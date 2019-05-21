@@ -1,4 +1,4 @@
-# Compiling
+# Compiling under Linux
 Makefile is not yet made, so in order to compile, run:
 g++ src/*.cpp -lsfml-graphics -lsfml-window -lsfml-system -o pacman
 
