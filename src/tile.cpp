@@ -81,7 +81,12 @@ void Tile::setContent(Contents content)
 
 bool Tile::isWall()
 {
-    return this->type == Type::wall;
+    return this->type == Type::wall || this->type == Type::ghosthouseDoor;
+}
+
+bool Tile::isTunel()
+{
+    return this->type == Type::tunel;
 }
 
 void Tile::draw(sf::RenderWindow& window)

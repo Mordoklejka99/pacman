@@ -29,7 +29,6 @@ MenuEntry::MenuEntry(std::shared_ptr<sf::Font> font, std::string text, float y)
 
 MenuEntry::~MenuEntry()
 {
-    std::cerr << this->font.use_count() << std::endl;
 }
 
 void MenuEntry::draw(sf::RenderWindow& window, bool selected)

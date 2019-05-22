@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "headers/game.hpp"
 #include "headers/config.hpp"
@@ -61,6 +62,13 @@ int game(sf::RenderWindow& window)
 
     std::shared_ptr<Map> map = std::make_shared<Map>(CONFIG.mapData);
     Pacman player(CONFIG.mapData->pacmanX, CONFIG.mapData->pacmanY, DEFINES.PACMAN_SIZE, PACMAN_SPEED, map);
+
+    sf::Font font;
+    font.loadFromFile("fonts/crackman.ttf");
+    std::cerr << player.getScore() << std::endl;
+    sf::Text score("Score: " + std::to_string(player.getScore()), font, 40);
+    score.setPosition({DEFINES.MAP_MARGIN_SIDE, (DEFINES.MAP_MARGIN_TOP - score.getLocalBounds().height) / 2});
+    
     while(window.isOpen())
     {
         processGameEvents(window, player);
@@ -68,8 +76,12 @@ int game(sf::RenderWindow& window)
         window.clear();
 
         map->draw(window);
+
         player.move();
         player.draw(window);
+
+        score.setString("Score: " + std::to_string(player.getScore()));
+        window.draw(score);
 
         window.display();
     }
