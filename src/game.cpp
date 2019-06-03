@@ -8,6 +8,7 @@
 #include "headers/tile.hpp"
 #include "headers/map.hpp"
 #include "headers/pacman.hpp"
+#include "headers/ghost.hpp"
 
 void processGameEvents(sf::RenderWindow& window, Pacman& player)
 {
@@ -63,6 +64,11 @@ int game(sf::RenderWindow& window)
     std::shared_ptr<Map> map = std::make_shared<Map>(CONFIG.mapData);
     Pacman player(CONFIG.mapData->pacmanX, CONFIG.mapData->pacmanY, DEFINES.PACMAN_SIZE, PACMAN_SPEED, map);
 
+    Inky inky(CONFIG.mapData->inky, GHOST_SPEED, map);
+    Blinky blinky(CONFIG.mapData->blinky, GHOST_SPEED, map);
+    Pinky pinky(CONFIG.mapData->pinky, GHOST_SPEED, map);
+    Clyde clyde(CONFIG.mapData->clyde, GHOST_SPEED, map);
+
     sf::Font font;
     font.loadFromFile("fonts/crackman.ttf");
     std::cerr << player.getScore() << std::endl;
@@ -79,6 +85,11 @@ int game(sf::RenderWindow& window)
 
         player.move();
         player.draw(window);
+
+        inky.draw(window);
+        blinky.draw(window);
+        pinky.draw(window);
+        clyde.draw(window);
 
         score.setString("Score: " + std::to_string(player.getScore()));
         window.draw(score);

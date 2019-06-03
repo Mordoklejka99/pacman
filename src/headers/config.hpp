@@ -36,6 +36,35 @@ struct MapData
     Tile*** tiles;
     std::shared_ptr<sf::Texture> backgroundImage;
     std::shared_ptr<sf::Sprite> background;
+
+    struct Inky
+    {
+        float x;
+        float y;
+        std::shared_ptr<sf::Texture> ghostImage;
+        std::shared_ptr<sf::Sprite> ghostSprite;
+    } inky;
+    struct Blinky
+    {
+        float x;
+        float y;
+        std::shared_ptr<sf::Texture> ghostImage;
+        std::shared_ptr<sf::Sprite> ghostSprite;
+    } blinky;
+    struct Pinky
+    {
+        float x;
+        float y;
+        std::shared_ptr<sf::Texture> ghostImage;
+        std::shared_ptr<sf::Sprite> ghostSprite;
+    } pinky;
+    struct Clyde
+    {
+        float x;
+        float y;
+        std::shared_ptr<sf::Texture> ghostImage;
+        std::shared_ptr<sf::Sprite> ghostSprite;
+    } clyde;
 };
 
 struct Config
@@ -49,8 +78,8 @@ struct Config
     bool fullscreen;
     std::string map;
 
-    std::unique_ptr<MenuData> menuData;
-    std::unique_ptr<MapData> mapData;
+    std::shared_ptr<MenuData> menuData;
+    std::shared_ptr<MapData> mapData;
 };
 
 extern Defines DEFINES;

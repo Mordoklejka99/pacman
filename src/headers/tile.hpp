@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 
 using texture_ptr = std::shared_ptr<sf::Texture>;
-using sprite_ptr = std::shared_ptr<sf::Sprite>;
+using sprite_ptr = std::unique_ptr<sf::Sprite>;
 
 enum class Type
 {
@@ -52,6 +52,7 @@ public:
     bool containsSuperDot();
     void setContent(Contents content);
     bool isWall();
+    bool isTunel();
 
     void draw(sf::RenderWindow& window);
 };

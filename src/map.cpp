@@ -6,7 +6,7 @@
 #include "headers/tile.hpp"
 #include "headers/config.hpp"
 
-Map::Map(std::unique_ptr<MapData>& map)
+Map::Map(std::shared_ptr<MapData>& map)
 {
     this->width = map->width;
     this->height = map->height;

@@ -15,7 +15,7 @@ class Map
     std::shared_ptr<sf::Sprite> background;
 
 public:
-    Map(std::unique_ptr<MapData>& map);
+    Map(std::shared_ptr<MapData>& map);
     ~Map();
     int getWidth();
     int getHeight();

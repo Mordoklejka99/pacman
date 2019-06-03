@@ -33,6 +33,7 @@ public:
     ~Pacman() {};
     void setDirection(Direction dir);
     sf::Vector2f getPosition();
+    int getScore();
     void turn(Direction dir);
     void move();
     void draw(sf::RenderWindow& window);

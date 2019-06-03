@@ -47,7 +47,7 @@ bool loadMenu()
 {
     try
     {
-        CONFIG.menuData = std::make_unique<MenuData>();
+        CONFIG.menuData = std::make_shared<MenuData>();
         CONFIG.menuData->backgroundImage = std::make_shared<sf::Texture>();
 
         for(int i = 0; i < RESOLUTION_COUNT; i++)
@@ -90,7 +90,7 @@ bool loadMap()
         Json::Value map;
         mapFile >> map;
 
-        CONFIG.mapData = std::make_unique<MapData>();
+        CONFIG.mapData = std::make_shared<MapData>();
 
         //loading map size in tiles
         CONFIG.mapData->width = map.get("width", 28).asInt();
@@ -166,6 +166,59 @@ bool loadMap()
 
         CONFIG.mapData->pacmanX = DEFINES.MAP_MARGIN_SIDE + map["pacman"].get("x", 0).asFloat() * DEFINES.TILE_SIZE;
         CONFIG.mapData->pacmanY = DEFINES.MAP_MARGIN_TOP + map["pacman"].get("y", 0).asFloat() * DEFINES.TILE_SIZE;
+
+        //loading ghost images;
+        float scaleX;
+        float scaleY;
+
+        //Inky
+        CONFIG.mapData->inky.x = DEFINES.MAP_MARGIN_SIDE + map["inky"].get("x", 0).asFloat() * DEFINES.TILE_SIZE;
+        CONFIG.mapData->inky.y = DEFINES.MAP_MARGIN_TOP + map["inky"].get("y", 0).asFloat() * DEFINES.TILE_SIZE;
+
+        CONFIG.mapData->inky.ghostImage = std::make_shared<sf::Texture>();
+        CONFIG.mapData->inky.ghostImage->loadFromFile("img/inky.png");
+        CONFIG.mapData->inky.ghostSprite = std::make_shared<sf::Sprite>(*CONFIG.mapData->inky.ghostImage);
+
+        scaleX = DEFINES.TILE_SIZE / CONFIG.mapData->inky.ghostImage->getSize().x;
+        scaleY = DEFINES.TILE_SIZE / CONFIG.mapData->inky.ghostImage->getSize().y;
+
+        CONFIG.mapData->inky.ghostSprite->setScale(scaleX, scaleY);
+        //Blinky
+        CONFIG.mapData->blinky.x = DEFINES.MAP_MARGIN_SIDE + map["blinky"].get("x", 0).asFloat() * DEFINES.TILE_SIZE;
+        CONFIG.mapData->blinky.y = DEFINES.MAP_MARGIN_TOP + map["blinky"].get("y", 0).asFloat() * DEFINES.TILE_SIZE;
+        
+        CONFIG.mapData->blinky.ghostImage = std::make_shared<sf::Texture>();
+        CONFIG.mapData->blinky.ghostImage->loadFromFile("img/blinky.png");
+        CONFIG.mapData->blinky.ghostSprite = std::make_shared<sf::Sprite>(*CONFIG.mapData->blinky.ghostImage);
+
+        scaleX = DEFINES.TILE_SIZE / CONFIG.mapData->blinky.ghostImage->getSize().x;
+        scaleY = DEFINES.TILE_SIZE / CONFIG.mapData->blinky.ghostImage->getSize().y;
+        
+        CONFIG.mapData->blinky.ghostSprite->setScale(scaleX, scaleY);
+        //Pinky
+        CONFIG.mapData->pinky.x = DEFINES.MAP_MARGIN_SIDE + map["pinky"].get("x", 0).asFloat() * DEFINES.TILE_SIZE;
+        CONFIG.mapData->pinky.y = DEFINES.MAP_MARGIN_TOP + map["pinky"].get("y", 0).asFloat() * DEFINES.TILE_SIZE;
+        
+        CONFIG.mapData->pinky.ghostImage = std::make_shared<sf::Texture>();
+        CONFIG.mapData->pinky.ghostImage->loadFromFile("img/pinky.png");
+        CONFIG.mapData->pinky.ghostSprite = std::make_shared<sf::Sprite>(*CONFIG.mapData->pinky.ghostImage);
+
+        scaleX = DEFINES.TILE_SIZE / CONFIG.mapData->pinky.ghostImage->getSize().x;
+        scaleY = DEFINES.TILE_SIZE / CONFIG.mapData->pinky.ghostImage->getSize().y;
+        
+        CONFIG.mapData->pinky.ghostSprite->setScale(scaleX, scaleY);
+        //Clyde
+        CONFIG.mapData->clyde.x = DEFINES.MAP_MARGIN_SIDE + map["clyde"].get("x", 0).asFloat() * DEFINES.TILE_SIZE;
+        CONFIG.mapData->clyde.y = DEFINES.MAP_MARGIN_TOP + map["clyde"].get("y", 0).asFloat() * DEFINES.TILE_SIZE;
+        
+        CONFIG.mapData->clyde.ghostImage = std::make_shared<sf::Texture>();
+        CONFIG.mapData->clyde.ghostImage->loadFromFile("img/clyde.png");
+        CONFIG.mapData->clyde.ghostSprite = std::make_shared<sf::Sprite>(*CONFIG.mapData->clyde.ghostImage);
+
+        scaleX = DEFINES.TILE_SIZE / CONFIG.mapData->clyde.ghostImage->getSize().x;
+        scaleY = DEFINES.TILE_SIZE / CONFIG.mapData->clyde.ghostImage->getSize().y;
+        
+        CONFIG.mapData->clyde.ghostSprite->setScale(scaleX, scaleY);
         
         return true;
     }
