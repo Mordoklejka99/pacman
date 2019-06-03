@@ -1,5 +1,5 @@
 # Compiling under Linux
-Makefile is not yet made, so in order to compile, run:
+Run compile.sh to compile project. The following line is used to compile:
 g++ src/*.cpp -lsfml-graphics -lsfml-window -lsfml-system -o pacman
 
 In order to compile, the following packages are required:
