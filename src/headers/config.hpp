@@ -6,7 +6,7 @@
 class Tile;
 
 #define PACMAN_SPEED 3.0f
-#define GHOST_SPEED 4.0f
+#define GHOST_SPEED 3.04f
 
 #define RESOLUTION_COUNT 3
 
@@ -31,6 +31,7 @@ struct MapData
 {
     int width;
     int height;
+    int dotCount;
     float pacmanX;
     float pacmanY;
     Tile*** tiles;
@@ -81,6 +82,18 @@ struct Config
     std::shared_ptr<MenuData> menuData;
     std::shared_ptr<MapData> mapData;
 };
+
+enum class Direction
+{
+    none = 0,
+    left,
+    right,
+    up,
+    down,
+    nOfDirections
+};
+
+extern sf::Vector2f Directions[5];
 
 extern Defines DEFINES;
 extern Config CONFIG;

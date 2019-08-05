@@ -10,6 +10,7 @@ Map::Map(std::shared_ptr<MapData>& map)
 {
     this->width = map->width;
     this->height = map->height;
+    this->dotCount = map->dotCount;
     this->tiles = map->tiles;
     this->backgroundImage = map->backgroundImage;
     this->background = map->background;
@@ -36,6 +37,11 @@ int Map::getHeight()
     return this->height;
 }
 
+int Map::dotsLeft()
+{
+    return this->dotCount;
+}
+
 void Map::draw(sf::RenderWindow& window)
 {
     window.draw(*(this->background));
@@ -51,4 +57,20 @@ Tile& Map::operator()(int c, int r)
         return *(this->tiles[c][r]);
     else
         throw;
+}
+
+Tile& Map::operator()(sf::Vector2i pos)
+{
+    if(pos.x < this->width && pos.x > -1 && pos.y < this->height && pos.y > -1)
+        return *(this->tiles[pos.x][pos.y]);
+    else
+        throw;
+}
+
+int Map::operator--(int)
+{
+    int val = this->dotCount;
+    if(this->dotCount)
+        this->dotCount--;
+    return val;
 }

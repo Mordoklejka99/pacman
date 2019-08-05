@@ -9,6 +9,15 @@
 #include "headers/tile.hpp"
 #include "headers/settings.hpp"
 
+sf::Vector2f Directions[] =
+    {
+        sf::Vector2f(0, 0),
+        sf::Vector2f(-1, 0),
+        sf::Vector2f(1, 0),
+        sf::Vector2f(0, -1),
+        sf::Vector2f(0, 1)
+    };
+
 Defines DEFINES;
 Config CONFIG;
 
@@ -129,6 +138,7 @@ bool loadMap()
 
         //loading tiles from map file
         CONFIG.mapData->tiles = new Tile**[CONFIG.mapData->width];
+        CONFIG.mapData->dotCount = 0;
 
         const Json::Value mapStringArray = map["map"];
         for(int c = 0; c < CONFIG.mapData->width; c++)
@@ -150,9 +160,11 @@ bool loadMap()
                     break;
                 case '.':
                     CONFIG.mapData->tiles[c][r] = new Tile(c, r, dotImage, superDotImage, Type::empty, Contents::dot);
+                    CONFIG.mapData->dotCount++;
                     break;
                 case '*':
                     CONFIG.mapData->tiles[c][r] = new Tile(c, r, dotImage, superDotImage, Type::empty, Contents::superdot);
+                    CONFIG.mapData->dotCount++;
                     break;
                 case 't':
                     CONFIG.mapData->tiles[c][r] = new Tile(c, r, dotImage, superDotImage, Type::tunel, Contents::none);

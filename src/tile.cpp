@@ -6,8 +6,7 @@
 
 Tile::Tile(int c, int r, texture_ptr dotImage, texture_ptr superDotImage, Type type, Contents content)
 {
-    this->c = c;
-    this->r = r;
+    this->position = {c, r};
     this->type = type;
     this->pacman = content == Contents::pacman ? true : false;
     this->ghost = content == Contents::ghost ? true : false;
@@ -19,23 +18,23 @@ Tile::Tile(int c, int r, texture_ptr dotImage, texture_ptr superDotImage, Type t
     this->superDotImage = superDotImage;
     this->superDotSprite = std::make_unique<sf::Sprite>(*this->superDotImage);
 
-    this->x = DEFINES.MAP_MARGIN_SIDE + this->c * DEFINES.TILE_SIZE;
-    this->y = DEFINES.MAP_MARGIN_TOP + this->r * DEFINES.TILE_SIZE;
+    this->coords.x = DEFINES.MAP_MARGIN_SIDE + this->position.c * DEFINES.TILE_SIZE;
+    this->coords.y = DEFINES.MAP_MARGIN_TOP + this->position.r * DEFINES.TILE_SIZE;
 
     this->dotSprite->setScale(DEFINES.TILE_SIZE / this->dotImage->getSize().x, DEFINES.TILE_SIZE / this->dotImage->getSize().y);
     this->superDotSprite->setScale(DEFINES.TILE_SIZE / this->superDotImage->getSize().x, DEFINES.TILE_SIZE / this->superDotImage->getSize().y);
-    this->dotSprite->setPosition(this->x, this->y);
-    this->superDotSprite->setPosition(this->x, this->y);
+    this->dotSprite->setPosition(this->coords.x, this->coords.y);
+    this->superDotSprite->setPosition(this->coords.x, this->coords.y);
 }
 
-sf::Vector2i Tile::getCoords()
+sf::Vector2f Tile::getCoords()
 {
-    return {this->c, this->r};
+    return {this->coords.x, this->coords.y};
 }
 
-sf::Vector2f Tile::getPosition()
+sf::Vector2i Tile::getPosition()
 {
-    return {this->x, this->y};
+    return {this->position.c, this->position.r};
 }
 
 bool Tile::containsPacman()
@@ -75,6 +74,19 @@ void Tile::setContent(Contents content)
         this->ghost = false;
         this->dot = false;
         this->superDot = false;
+        break;
+    }
+}
+
+void Tile::unsetContent(Contents content)
+{
+    switch(content)
+    {
+    case Contents::pacman:
+        this->pacman = false;
+        break;
+    case Contents::ghost:
+        this->ghost = false;
         break;
     }
 }

@@ -4,47 +4,44 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 
-class MapData;
+#include "config.hpp"
+
+enum class Direction;
 class Map;
+class Pacman;
 
 class Ghost
 {
-    float x;
-    float y;
-    int c;
-    int r;
+    struct
+    {
+        float x;
+        float y;
+    } coords;
+    struct
+    {
+        int c;
+        int r;
+    } position;
     float speed;
+    float radius;
+    Direction moveDirection;
     std::shared_ptr<Map> map;
 
     std::shared_ptr<sf::Texture> ghostImage;
     std::shared_ptr<sf::Sprite> ghostSprite;
+
 public:
     Ghost(float x, float y, float speed, std::shared_ptr<sf::Texture>& ghostImage, std::shared_ptr<sf::Sprite>& ghostSprite, std::shared_ptr<Map>& map);
+    void move(Pacman& pacman);
     void draw(sf::RenderWindow& window);
-};
+    Direction getDirection();
+    sf::Vector2f getCoords();
+    sf::Vector2i getPosition();
 
-class Inky : public Ghost
-{
-public:
-    Inky(MapData::Inky inky, float speed, std::shared_ptr<Map>& map) : Ghost(inky.x, inky.y, speed, inky.ghostImage, inky.ghostSprite, map) {};
-};
-
-class Blinky : public Ghost
-{
-public:
-    Blinky(MapData::Blinky blinky, float speed, std::shared_ptr<Map>& map) : Ghost(blinky.x, blinky.y, speed, blinky.ghostImage, blinky.ghostSprite, map) {};
-};
-
-class Pinky : public Ghost
-{
-public:
-    Pinky(MapData::Pinky pinky, float speed, std::shared_ptr<Map>& map) : Ghost(pinky.x, pinky.y, speed, pinky.ghostImage, pinky.ghostSprite, map) {};
-};
-
-class Clyde : public Ghost
-{
-public:
-    Clyde(MapData::Clyde clyde, float speed, std::shared_ptr<Map>& map) : Ghost(clyde.x, clyde.y, speed, clyde.ghostImage, clyde.ghostSprite, map) {};
+private:
+    sf::Vector2i findTilePosition(sf::Vector2f pos);
+    virtual sf::Vector2f getDestination(Pacman& pacman) const = 0;
+    Direction findPath(sf::Vector2f destination);
 };
 
 #endif

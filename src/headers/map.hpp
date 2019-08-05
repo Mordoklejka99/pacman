@@ -10,6 +10,7 @@ class Map
 {
     int width;
     int height;
+    int dotCount;
     Tile*** tiles;
     std::shared_ptr<sf::Texture> backgroundImage;
     std::shared_ptr<sf::Sprite> background;
@@ -19,9 +20,12 @@ public:
     ~Map();
     int getWidth();
     int getHeight();
+    int dotsLeft();
     void draw(sf::RenderWindow& window);
 
     Tile& operator()(int c, int r);
+    Tile& operator()(sf::Vector2i pos);
+    int operator--(int);
 };
 
 #endif

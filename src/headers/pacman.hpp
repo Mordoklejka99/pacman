@@ -3,24 +3,23 @@
 
 #include <memory>
 
+enum class Direction;
 class Map;
-
-enum class Direction
-{
-    left,
-    up,
-    right,
-    down,
-    none
-};
 
 class Pacman
 {
     int score;
-    float x;
-    float y;
-    int c;
-    int r;
+    bool dead;
+    struct
+    {
+        float x;
+        float y;
+    } coords;
+    struct
+    {
+        int c;
+        int r;
+    } position;
     float radius;
     float speed;
     Direction moveDirection;
@@ -32,14 +31,20 @@ public:
     Pacman(float x, float y, float radius, float speed, std::shared_ptr<Map>& map);
     ~Pacman() {};
     void setDirection(Direction dir);
-    sf::Vector2f getPosition();
+    Direction getDirection();
+    void setCoords(float x, float y);
+    sf::Vector2f getCoords();
+    void setPosition(int c, int r);
+    sf::Vector2i getPosition();
     int getScore();
+    bool isDead();
+    void revive();
     void turn(Direction dir);
     void move();
     void draw(sf::RenderWindow& window);
 
 private:
-    sf::Vector2i findTilePosition(float x, float y);
+    sf::Vector2i findTilePosition(sf::Vector2f position);
 };
 
 #endif

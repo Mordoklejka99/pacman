@@ -27,10 +27,16 @@ enum class Contents
 
 class Tile
 {
-    int c;
-    int r;
-    float x;
-    float y;
+    struct
+    {
+        float x;
+        float y;
+    } coords;
+    struct
+    {
+        int c;
+        int r;
+    } position;
     Type type;
     bool pacman;
     bool ghost;
@@ -44,13 +50,14 @@ class Tile
 
 public:
     Tile(int c, int r, texture_ptr dotImage, texture_ptr superDotImage, Type type, Contents content = Contents::none);
-    sf::Vector2i getCoords();
-    sf::Vector2f getPosition();
+    sf::Vector2f getCoords();
+    sf::Vector2i getPosition();
     bool containsPacman();
     bool containsGhost();
     bool containsDot();
     bool containsSuperDot();
     void setContent(Contents content);
+    void unsetContent(Contents content);
     bool isWall();
     bool isTunel();
 
