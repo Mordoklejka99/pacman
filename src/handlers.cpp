@@ -1,32 +1,50 @@
+// standard c++ lib
 #include <iostream>
-#include <SFML/Graphics.hpp>
-#include "headers/handlers.hpp"
+#include <atomic>
 
-void handleGameEvents(sf::RenderWindow& window)
+// additional libs
+#include <SFML/Graphics.hpp>
+
+// project headers
+#include "headers/handlers.hpp"
+#include "headers/pacman.hpp"
+
+void handleGameEvents(sf::RenderWindow& window, Pacman& pacman)
 {
-    while(window.isOpen())
+    sf::Event event;
+    while(window.pollEvent(event))
     {
-        std::cerr << "Started handler" << std::endl;
-        sf::Event event;
-        while(window.waitEvent(event))
+        switch(event.type)
         {
-            std::cerr << "\tStarted while" << std::endl;
-            switch(event.type)
+        case sf::Event::Closed:
+            std::cerr << "\t\tClosed" << std::endl;
+            window.close();
+            return;
+        case sf::Event::KeyPressed:
+            switch(event.key.code)
             {
-            case sf::Event::Closed:
-                std::cerr << "\t\tClosed" << std::endl;
+            case sf::Keyboard::Escape:
+                std::cerr << "\t\tEsc" << std::endl;
                 window.close();
                 return;
-            case sf::Event::KeyPressed:
-                switch(event.key.code)
-                {
-                case sf::Keyboard::Escape:
-                    std::cerr << "\t\tEsc" << std::endl;
-                    window.close();
-                    return;
-                }
+            case sf::Keyboard::Up:
+                pacman.turn(Direction::up);
+                break;
+            case sf::Keyboard::Right:
+                pacman.turn(Direction::right);
+                break;
+            case sf::Keyboard::Down:
+                pacman.turn(Direction::down);
+                break;
+            case sf::Keyboard::Left:
+                pacman.turn(Direction::left);
+                break;
+            default:
                 break;
             }
+            break;
+        default:
+            break;
         }
     }
 }

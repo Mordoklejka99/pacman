@@ -1,6 +1,5 @@
 // standard c++ lib
 #include <iostream>
-#include <memory>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -11,12 +10,16 @@
 
 
 // ctors
+
 Tile::Tile(Position position, TileContents content)
 {
     this->position = position;
     this->coords.x = DEFINES.SIDE_MARGIN + float(this->position.c) * DEFINES.TILE_SIZE;
     this->coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + float(this->position.r) * DEFINES.TILE_SIZE;
     this->content = content;
+
+    this->pacman = false;
+    this->ghost = false;
 
     this->sprite = nullptr;
 }
@@ -33,7 +36,9 @@ Tile::Tile(Position position, TileContents content, sf::Texture* texture)
     this->sprite->setPosition(this->coords.x, this->coords.y);
 }
 
+
 // getters
+
 Coords Tile::getCoords()
 {
     return this->coords;
@@ -44,12 +49,19 @@ Position Tile::getPosition()
     return this->position;
 }
 
+TileContents Tile::getContent()
+{
+    return this->content;
+}
+
 sf::Sprite& Tile::getSprite()
 {
     return *this->sprite;
 }
 
+
 // setters
+
 void Tile::setCoords(Coords coords)
 {
     this->coords = coords;
@@ -60,7 +72,43 @@ void Tile::setPosition(Position position)
     this->position = position;
 }
 
+void Tile::setPacman(bool state)
+{
+    this->pacman = state;
+    if(this->pacman && (this->containsDot() || this->containsSuperDot()))
+    {
+        delete this->sprite;
+        this->sprite = nullptr;
+        this->content = TileContents::none;
+    }
+}
+
+void Tile::setGhost(bool state)
+{
+    this->ghost = state;
+}
+
 // methods
+
+bool Tile::isWall()
+{
+    return this->content == TileContents::wall || this->content == TileContents::ghosthouseDoor;
+}
+
+bool Tile::isTunel()
+{
+    return this->content == TileContents::tunel;
+}
+
+bool Tile::containsDot()
+{
+    return this->content == TileContents::dot;
+}
+
+bool Tile::containsSuperDot()
+{
+    return this->content == TileContents::superDot;
+}
 
 void Tile::draw(sf::RenderWindow& window)
 {

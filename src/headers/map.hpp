@@ -21,6 +21,9 @@ public:
     // ctor
     Map(MapData& mapData);
 
+    // dtor
+    ~Map();
+
     // getters
     uint getWidth();
     uint getHeight();
@@ -28,7 +31,8 @@ public:
 
     // operators
     Tile& operator()(uint row, uint col);
-    void operator--();
+    Tile& operator()(Position position);
+    void operator--(int);
 
     // methods
     void draw(sf::RenderWindow& window);

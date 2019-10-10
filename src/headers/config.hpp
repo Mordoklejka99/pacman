@@ -1,27 +1,59 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <memory>
+// #include <SFML/Graphics.hpp>
 
 using uint = unsigned int;
 
 namespace sf
 {
     class Texture;
+
+    template <typename T>
+    class Vector2;
+
+    typedef Vector2<float> Vector2f;
+    typedef Vector2<int> Vector2i;
 };
 
 class Tile;
+
+struct Resolution
+{
+    float width;
+    float height;
+};
+
+enum class Direction
+{
+    none = 0,
+    left,
+    right,
+    up,
+    down,
+    nOfDirections
+};
 
 struct Coords
 {
     float x;
     float y;
 
-    friend std::ostream& operator<<(std::ostream& out, Coords rval)
-    {
-        out << rval.x << " " << rval.y;
-        return out;
-    }
+    // ctors
+    Coords();
+    Coords(float val);
+    Coords(float x, float y);
+    Coords(sf::Vector2f& v);
+
+    // operators
+    Coords& operator=(Coords rval);
+    bool operator==(Coords& rval);
+    Coords operator+(Coords rval);
+    Coords operator+(sf::Vector2f rval);
+    Coords operator-(Coords rval);
+    Coords& operator+=(Coords rval);
+    Coords& operator+=(sf::Vector2f rval);
+    friend std::ostream& operator<<(std::ostream& out, Coords rval);
 };
 
 struct Position
@@ -29,32 +61,18 @@ struct Position
     uint c;
     uint r;
 
-    Position()
-    {
-        this->c = 0;
-        this->r = 0;
-    }
-    Position(uint c, uint r)
-    {
-        this->c = c;
-        this->r = r;
-    }
-    Position& operator=(Position& rval)
-    {
-        this->c = rval.c;
-        this->r = rval.r;
-        return *this;
-    }
-    bool operator==(Position rval)
-    {
-        return this->c == rval.c && this->r == rval.r;
-    }
-};
+    // ctors
+    Position();
+    Position(uint c, uint r);
+    Position& operator=(Position rval);
 
-struct Resolution
-{
-    float width;
-    float height;
+    // operators
+    bool operator==(Position& rval);
+    Position operator+(Position rval);
+    Position operator+(sf::Vector2f rval);
+    Position operator%(sf::Vector2i rval);
+    Position& operator+=(sf::Vector2f rval);
+    friend std::ostream& operator<<(std::ostream& out, Position rval);
 };
 
 enum class TileContents
@@ -73,6 +91,7 @@ struct Defines
     float TOP_MARGIN;
     float HUD_MARGIN;
     float TILE_SIZE;
+    const float PACMAN_SPEED = 3.;
 };
 
 struct Config
@@ -82,6 +101,7 @@ struct Config
     sf::Texture* dotTexture;
     sf::Texture* superDotTexture;
     sf::Texture* wallTexture;
+    sf::Texture* pacmanTexture;
 };
 
 struct MapData
@@ -90,28 +110,23 @@ struct MapData
     uint height;
     struct
     {
-        uint x;
-        uint y;
+        Coords coords;
     } pacman;
     struct
     {
-        uint x;
-        uint y;
+        Coords coords;
     } inky;
     struct
     {
-        uint x;
-        uint y;
+        Coords coords;
     } blinky;
     struct
     {
-        uint x;
-        uint y;
+        Coords coords;
     } pinky;
     struct
     {
-        uint x;
-        uint y;
+        Coords coords;
     } clyde;
     Tile*** tiles;
     uint dotCount;
@@ -124,5 +139,7 @@ bool loadMap(MapData& mapData);
 
 extern Defines DEFINES;
 extern Config CONFIG;
+
+extern sf::Vector2f Directions[];
 
 #endif

@@ -1,6 +1,5 @@
 // std c++ lib
 #include <iostream>
-#include <thread>
 
 // additional lib
 #include <SFML/Graphics.hpp>
@@ -18,6 +17,20 @@ Map::Map(MapData& mapData)
     this->height = mapData.height;
 
     this->tiles = mapData.tiles;
+}
+
+// dtor
+Map::~Map()
+{
+    for(uint c = 0; c < this->width; c++)
+    {
+        for(uint r = 0; r < this->height; r++)
+        {
+            delete this->tiles[c][r];
+        }
+        delete[] this->tiles[c];
+    }
+    delete[] this->tiles;
 }
 
 // getters
@@ -44,7 +57,14 @@ Tile& Map::operator()(uint col, uint row)
     return *(this->tiles[col][row]);
 }
 
-void Map::operator--()
+Tile& Map::operator()(Position position)
+{
+    if(position.c >= this->width || position.r >= this->height)
+        throw("Invalid indices for Map::operator()");
+    return *(this->tiles[position.c][position.r]);
+}
+
+void Map::operator--(int)
 {
     this->dotCount--;
 }

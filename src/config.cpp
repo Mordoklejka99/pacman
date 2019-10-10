@@ -16,6 +16,138 @@ Defines DEFINES;
 Config CONFIG;
 MapData mapData;
 
+sf::Vector2f Directions[] =
+{
+    sf::Vector2f(0, 0),
+    sf::Vector2f(-1, 0),
+    sf::Vector2f(1, 0),
+    sf::Vector2f(0, -1),
+    sf::Vector2f(0, 1)
+};
+
+// Coords
+
+// ctors
+Coords::Coords()
+{
+    this->x = 0.;
+    this->y = 0.;
+}
+Coords::Coords(float val)
+{
+    this->x = this->y = val;
+}
+
+Coords::Coords(float x, float y)
+{
+    this->x = x;
+    this->y = y;
+}
+Coords::Coords(sf::Vector2f& v)
+{
+    this->x = v.x;
+    this->y = v.y;
+}
+
+// operators
+Coords& Coords::operator=(Coords rval)
+{
+    if(this == &rval)
+        return *this;
+
+    this->x = rval.x;
+    this->y = rval.y;
+    return *this;
+}
+bool Coords::operator==(Coords& rval)
+{
+    return this->x == rval.x && this->y == rval.y;
+}
+Coords Coords::operator+(Coords rval)
+{
+    return Coords(this->x + rval.x, this->y + rval.y);
+}
+Coords Coords::operator+(sf::Vector2f rval)
+{
+    return Coords(this->x + rval.x, this->y + rval.y);
+}
+Coords Coords::operator-(Coords rval)
+{
+    return Coords(this->x - rval.x, this->y - rval.y);
+}
+Coords& Coords::operator+=(Coords rval)
+{
+    this->x += rval.x;
+    this->y += rval.y;
+    return *this;
+}
+Coords& Coords::operator+=(sf::Vector2f rval)
+{
+    this->x += rval.x;
+    this->y += rval.y;
+    return *this;
+}
+
+std::ostream& operator<<(std::ostream& out, Coords rval)
+{
+    out << rval.x << " " << rval.y;
+    return out;
+}
+
+
+// Position
+
+// ctors
+Position::Position()
+{
+    this->c = 0;
+    this->r = 0;
+}
+Position::Position(uint c, uint r)
+{
+    this->c = c;
+    this->r = r;
+}
+
+// operators
+Position& Position::operator=(Position rval)
+{
+    if(this == &rval)
+        return *this;
+    
+    this->c = rval.c;
+    this->r = rval.r;
+    return *this;
+}
+bool Position::operator==(Position& rval)
+{
+    return this->c == rval.c && this->r == rval.r;
+}
+Position Position::operator+(Position rval)
+{
+    return Position(this->c + rval.c, this->r + rval.r);
+}
+Position Position::operator+(sf::Vector2f rval)
+{
+    return Position(this->c + int(rval.x), this->r + int(rval.y));
+}
+Position Position::operator%(sf::Vector2i rval)
+{
+    return Position(this->c % rval.x, this->r % rval.y);
+}
+Position& Position::operator+=(sf::Vector2f rval)
+{
+    this->c += int(rval.x);
+    this->r += int(rval.y);
+    return *this;
+}
+std::ostream& operator<<(std::ostream& out, Position rval)
+{
+    out << rval.c << " " << rval.r;
+    return out;
+}
+
+
 bool loadConfigFile()
 {
     std::ifstream configFile("config.cfg");
@@ -48,6 +180,8 @@ bool loadTextures()
         CONFIG.superDotTexture->loadFromFile("textures/superdot.png");
         CONFIG.wallTexture = new sf::Texture;
         CONFIG.wallTexture->loadFromFile("textures/wall.png");
+        CONFIG.pacmanTexture = new sf::Texture;
+        CONFIG.pacmanTexture->loadFromFile("textures/pacman.png");
     }
     catch(std::exception e)
     {
@@ -89,19 +223,9 @@ bool loadMap(MapData& mapData)
 
     try
     {
-        // map data loading
+        // map size loading
         mapData.height = map["height"].asUInt();
         mapData.width = map["width"].asUInt();
-        mapData.pacman.x = map["pacman"]["x"].asUInt();
-        mapData.pacman.y = map["pacman"]["x"].asUInt();
-        mapData.inky.x = map["pacman"]["x"].asUInt();
-        mapData.inky.y = map["pacman"]["x"].asUInt();
-        mapData.blinky.x = map["pacman"]["x"].asUInt();
-        mapData.blinky.y = map["pacman"]["x"].asUInt();
-        mapData.pinky.x = map["pacman"]["x"].asUInt();
-        mapData.pinky.y = map["pacman"]["x"].asUInt();
-        mapData.clyde.x = map["pacman"]["x"].asUInt();
-        mapData.clyde.y = map["pacman"]["x"].asUInt();
 
         // calculating sizes in pixels
         float tileSize = CONFIG.resolution.width / mapData.width;
@@ -118,6 +242,18 @@ bool loadMap(MapData& mapData)
 
         // calculating top margin
         DEFINES.TOP_MARGIN = (CONFIG.resolution.height - DEFINES.HUD_MARGIN - DEFINES.TILE_SIZE * mapData.height) / 2;
+        
+        // map objects data loading
+        mapData.pacman.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.pacman.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.inky.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.inky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.blinky.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.blinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.pinky.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.pinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.clyde.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.clyde.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
     }
     catch(std::exception e)
     {

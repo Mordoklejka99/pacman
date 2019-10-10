@@ -1,7 +1,6 @@
 #ifndef TILE_HPP
 #define TILE_HPP
 
-#include <memory>
 #include <SFML/Graphics.hpp>
 #include "config.hpp"
 
@@ -13,6 +12,9 @@ private:
     TileContents content;
     sf::Sprite* sprite;
 
+    bool pacman;
+    bool ghost;
+
 public:
     // ctors
     Tile(Position position, TileContents content);
@@ -21,13 +23,20 @@ public:
     // getters
     Coords getCoords();
     Position getPosition();
+    TileContents getContent();
     sf::Sprite& getSprite();
 
     // setters
     void setCoords(Coords coords);
     void setPosition(Position position);
+    void setPacman(bool state);
+    void setGhost(bool state);
 
     // methods
+    bool isWall();
+    bool isTunel();
+    bool containsDot();
+    bool containsSuperDot();
     void draw(sf::RenderWindow& window);
 };
 
