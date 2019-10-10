@@ -1,6 +1,5 @@
 // standard c++ lib
 #include <iostream>
-#include <thread>
 
 // additional libs
 #include <SFML/Graphics.hpp>
