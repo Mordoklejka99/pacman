@@ -59,7 +59,8 @@ Tile& Map::operator()(uint col, uint row)
 
 Tile& Map::operator()(Position position)
 {
-    if(position.c >= this->width || position.r >= this->height)
+    if(position.c < 0 || position.c >= this->width
+        || position.r < 0 || position.r >= this->height)
         throw("Invalid indices for Map::operator()");
     return *(this->tiles[position.c][position.r]);
 }

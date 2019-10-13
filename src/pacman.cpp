@@ -1,6 +1,7 @@
 // standard c++ lib
 #include <iostream>
 #include <functional>
+#include <exception>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -79,20 +80,27 @@ void Pacman::move()
     Direction dir = this->plannedTurn;
 
     // if it's possible to turn, turn
-    if(!this->map(this->position + Directions[int(dir)]).isWall()
-        && Directions[int(dir)] == -Directions[int(this->moveDirection)])
+    try
     {
-        this->moveDirection = dir;
+        if(!this->map(this->position + Directions[int(dir)]).isWall()
+            && Directions[int(dir)] == -Directions[int(this->moveDirection)])
+        {
+            this->moveDirection = dir;
+        }
+        else if(!this->map(this->position + Directions[int(dir)]).isWall()
+            && this->coords.x < currTile.getCoords().x + 2
+            && this->coords.x > currTile.getCoords().x - 2
+            && this->coords.y < currTile.getCoords().y + 2
+            && this->coords.y > currTile.getCoords().y - 2
+            && dir != this->moveDirection)
+        {
+            this->coords = currTile.getCoords();
+            this->moveDirection = dir;
+        }
     }
-    else if(!this->map(this->position + Directions[int(dir)]).isWall()
-        && this->coords.x < currTile.getCoords().x + 2
-        && this->coords.x > currTile.getCoords().x - 2
-        && this->coords.y < currTile.getCoords().y + 2
-        && this->coords.y > currTile.getCoords().y - 2
-        && dir != this->moveDirection)
+    catch(...)
     {
-        this->coords = currTile.getCoords();
-        this->moveDirection = dir;
+        //
     }
 
     dir = this->moveDirection;
@@ -101,7 +109,6 @@ void Pacman::move()
     // if there's a tunel, go through it
     if(this->isAtBorder() && currTile.isTunel())
     {
-        #warning Tunel is not working -> it crashes the game
         // change coords
         this->coords += Directions[int(dir)] * this->speed;
 
@@ -110,15 +117,10 @@ void Pacman::move()
         if(center.x < this->map(0, 0).getCoords().x
             || center.x > this->map(this->map.getWidth() - 1, 0).getCoords().x + DEFINES.TILE_SIZE
             || center.y < this->map(0, 0).getCoords().y
-            || center.y > this->map(0, this->map.getHeight()).getCoords().y + DEFINES.TILE_SIZE)
+            || center.y > this->map(0, this->map.getHeight() - 1).getCoords().y + DEFINES.TILE_SIZE)
         {
-            this->position = ((this->position + Directions[int(dir)]) % sf::Vector2i(this->map.getWidth(), this->map.getHeight()) + Position(this->map.getWidth(), this->map.getHeight())) % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
+            this->position = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + Directions[int(dir)]) % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
             this->coords = this->map(this->position).getCoords() + currTile.getCoords() - this->coords;
-
-            // this->position.c = ((this->position.c + int(Directions[int(dir)].x)) % this->map->getWidth() + this->map->getWidth()) % this->map->getWidth();
-            // this->position.r = ((this->position.r + int(Directions[int(dir)].y)) % this->map->getHeight() + this->map->getHeight()) % this->map->getHeight();
-            // this->coords.x = (*this->map)(this->getPosition()).getCoords().x + tile.getCoords().x - this->coords.x + 2;
-            // this->coords.y = (*this->map)(this->getPosition()).getCoords().y + tile.getCoords().y - this->coords.y + 2;
         }
 
         // if moving towards center of the map and passed tile edge, update position
@@ -208,8 +210,8 @@ bool Pacman::findTilePosition(Coords coords)
 bool Pacman::isAtBorder()
 {
     Tile& tile = this->map(this->position);
-    return tile.getPosition().c == 0 || tile.getPosition().c == this->map.getWidth()
-            || tile.getPosition().r == 0 || tile.getPosition().r == this->map.getHeight();
+    return tile.getPosition().c == 0 || tile.getPosition().c == this->map.getWidth() - 1
+            || tile.getPosition().r == 0 || tile.getPosition().r == this->map.getHeight() - 1;
 }
 
 void Pacman::draw(sf::RenderWindow& window) const
