@@ -1,7 +1,5 @@
 // standard c++ lib
 #include <iostream>
-#include <functional>
-#include <exception>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -24,7 +22,15 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
     this->sprite->setPosition(this->coords.x, this->coords.y);
 
     this->speed = DEFINES.PACMAN_SPEED * this->sprite->getScale().x;
-    this->hasMoved = false;
+    this->moveDirection = Direction::none;
+    this->moved = false;
+}
+
+
+// dtor
+Pacman::~Pacman()
+{
+    delete this->sprite;
 }
 
 
@@ -38,6 +44,16 @@ Coords Pacman::getCoords() const
 Position Pacman::getPosition() const
 {
     return this->position;
+}
+
+Direction Pacman::getMoveDirection() const
+{
+    return this->moveDirection;
+}
+
+bool Pacman::hasMoved() const
+{
+    return this->moved;
 }
 
 bool Pacman::isDead() const
@@ -56,7 +72,7 @@ uint Pacman::getScore() const
 void Pacman::turn(Direction dir)
 {
     // if has moved, just plan turning
-    if(this->hasMoved)
+    if(this->moved)
         this->plannedTurn = dir;
     // otherwise try to move
     else
@@ -64,7 +80,7 @@ void Pacman::turn(Direction dir)
         if(this->findTilePosition(this->coords + Directions[int(dir)]))
         {
             this->moveDirection = this->plannedTurn = dir;
-            this->hasMoved = true;
+            this->moved = true;
         }
     }
 }
@@ -72,7 +88,7 @@ void Pacman::turn(Direction dir)
 void Pacman::move()
 {
     // if first move has not been done, stand by
-    if(!this->hasMoved)
+    if(!this->moved)
         return;
 
     // to shorten conditions at least a bit
@@ -119,7 +135,8 @@ void Pacman::move()
             || center.y < this->map(0, 0).getCoords().y
             || center.y > this->map(0, this->map.getHeight() - 1).getCoords().y + DEFINES.TILE_SIZE)
         {
-            this->position = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + Directions[int(dir)]) % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
+            this->position = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + Directions[int(dir)])
+                                % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
             this->coords = this->map(this->position).getCoords() + currTile.getCoords() - this->coords;
         }
 

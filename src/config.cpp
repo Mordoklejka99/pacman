@@ -182,6 +182,14 @@ bool loadTextures()
         CONFIG.wallTexture->loadFromFile("textures/wall.png");
         CONFIG.pacmanTexture = new sf::Texture;
         CONFIG.pacmanTexture->loadFromFile("textures/pacman.png");
+        CONFIG.blinkyTexture = new sf::Texture;
+        CONFIG.blinkyTexture->loadFromFile("textures/blinky.png");
+        CONFIG.pinkyTexture = new sf::Texture;
+        CONFIG.pinkyTexture->loadFromFile("textures/pinky.png");
+        CONFIG.inkyTexture = new sf::Texture;
+        CONFIG.inkyTexture->loadFromFile("textures/inky.png");
+        CONFIG.clydeTexture = new sf::Texture;
+        CONFIG.clydeTexture->loadFromFile("textures/clyde.png");
     }
     catch(std::exception e)
     {
@@ -246,14 +254,14 @@ bool loadMap(MapData& mapData)
         // map objects data loading
         mapData.pacman.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
         mapData.pacman.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.inky.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.inky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.blinky.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.blinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.pinky.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.pinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.clyde.coords.x = DEFINES.SIDE_MARGIN + map["pacman"]["x"].asFloat() * DEFINES.TILE_SIZE;
-        mapData.clyde.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.blinky.coords.x = DEFINES.SIDE_MARGIN + map["blinky"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.blinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["blinky"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.inky.coords.x = DEFINES.SIDE_MARGIN + map["inky"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.inky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["inky"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.pinky.coords.x = DEFINES.SIDE_MARGIN + map["pinky"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.pinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pinky"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.clyde.coords.x = DEFINES.SIDE_MARGIN + map["clyde"]["x"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.clyde.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["clyde"]["y"].asFloat() * DEFINES.TILE_SIZE;
     }
     catch(std::exception e)
     {
@@ -300,7 +308,7 @@ bool loadMap(MapData& mapData)
                     break;
                 case 'd':
                     mapData.tiles[c][r] = new Tile(position, TileContents::ghosthouseDoor, CONFIG.wallTexture);
-                    mapData.map[c][r] = false;
+                    mapData.map[c][r] = true;
                     break;
                 }
             }

@@ -12,6 +12,8 @@
 #include "headers/map.hpp"
 #include "headers/tile.hpp"
 #include "headers/pacman.hpp"
+#include "headers/ghost.hpp"
+#include "headers/blinky.hpp"
 
 
 int game()
@@ -28,6 +30,8 @@ int game()
 
     Map map(mapData);
     Pacman pacman(mapData, map);
+    Blinky blinky(mapData, map, pacman);
+
     
     sf::Clock clock;
     sf::Time prevTime = sf::milliseconds(0);
@@ -41,9 +45,12 @@ int game()
         handleGameEvents(window, pacman);
         window.clear();
 
-        map.draw(window);
         pacman.move();
+        blinky.move();
+
+        map.draw(window);
         pacman.draw(window);
+        blinky.draw(window);
 
         window.display();
     }

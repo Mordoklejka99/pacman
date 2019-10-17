@@ -1,47 +1,48 @@
-#ifndef PACMAN_HPP
-#define PACMAN_HPP
+#ifndef GHOST_HPP
+#define GHOST_HPP
 
 #include "config.hpp"
 
 class Map;
+class Pacman;
 
-class Pacman
+class Ghost
 {
-private:
+protected:
     Coords coords;
     Position position;
     Direction moveDirection;
-    Direction plannedTurn;
     float speed;
-    uint score;
-    bool dead;
-    bool moved;
+    bool hasMoved;
     sf::Sprite* sprite;
     Map& map;
+    Pacman& pacman;
+    bool** bMap;
+    int** iMap;
 
 public:
     // ctor
-    Pacman(MapData& mapData, Map& map);
+    Ghost(MapData& mapData, Map& map, Pacman& pacman, sf::Texture* texture);
 
     // dtor
-    ~Pacman();
+    ~Ghost();
 
     // getters
     Coords getCoords() const;
     Position getPosition() const;
     Direction getMoveDirection() const;
-    bool hasMoved() const;
-    bool isDead() const;
-    uint getScore() const;
 
     // methods
-    void turn(Direction dir);
     void move();
     void draw(sf::RenderWindow& window) const;
 
-private:
+protected:
     bool findTilePosition(Coords coords);
-    bool isAtBorder();
+    bool isAtBorder() const;
+    void zeroiMap();
+    void dijkstra(Position position);
+    virtual Position getDestination() const = 0;
+    Direction chooseDirection();
 };
 
 #endif

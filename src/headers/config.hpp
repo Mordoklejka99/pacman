@@ -8,6 +8,8 @@ using uint = unsigned int;
 namespace sf
 {
     class Texture;
+    class Sprite;
+    class RenderWindow;
 
     template <typename T>
     class Vector2;
@@ -92,6 +94,7 @@ struct Defines
     float HUD_MARGIN;
     float TILE_SIZE;
     const float PACMAN_SPEED = 3.;
+    const float GHOST_SPEED = 2.7;
 };
 
 struct Config
@@ -102,6 +105,10 @@ struct Config
     sf::Texture* superDotTexture;
     sf::Texture* wallTexture;
     sf::Texture* pacmanTexture;
+    sf::Texture* blinkyTexture;
+    sf::Texture* pinkyTexture;
+    sf::Texture* inkyTexture;
+    sf::Texture* clydeTexture;
 };
 
 struct MapData
@@ -140,6 +147,6 @@ bool loadMap(MapData& mapData);
 extern Defines DEFINES;
 extern Config CONFIG;
 
-extern sf::Vector2f Directions[];
+extern sf::Vector2f Directions[int(Direction::nOfDirections)];
 
 #endif

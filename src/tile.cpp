@@ -114,7 +114,6 @@ void Tile::draw(sf::RenderWindow& window)
 {
     if(this->sprite)
     {
-        auto a = this->sprite->getGlobalBounds();
         window.draw(*this->sprite);
     }
 }
