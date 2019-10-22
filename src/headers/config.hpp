@@ -21,6 +21,12 @@ namespace sf
 
 class Tile;
 
+template <typename T>
+sf::Vector2<T> operator* (float val, sf::Vector2<T> v)
+{
+    return sf::Vector2<T>(val * v.x, val * v.y);
+}
+
 struct Resolution
 {
     float width;
@@ -30,10 +36,10 @@ struct Resolution
 enum class Direction
 {
     none = 0,
-    left,
-    right,
     up,
     down,
+    left,
+    right,
     nOfDirections
 };
 
@@ -70,22 +76,26 @@ struct Coords
 
 struct Position
 {
-    uint c;
-    uint r;
+    int c;
+    int r;
 
     // ctors
     Position();
-    Position(uint c, uint r);
+    Position(int c, int r);
     Position& operator=(Position rval);
 
     // operators
     bool operator==(Position& rval);
     Position operator+(Position rval);
     Position operator+(sf::Vector2f rval);
+    Position operator-(Position rval);
+    Position operator-(sf::Vector2f rval);
     Position operator%(sf::Vector2i rval);
     Position& operator+=(sf::Vector2f rval);
     friend std::ostream& operator<<(std::ostream& out, Position rval);
 };
+
+uint distance(Position lhv, Position rhv);
 
 enum class TileContents
 {
@@ -103,8 +113,8 @@ struct Defines
     float TOP_MARGIN;
     float HUD_MARGIN;
     float TILE_SIZE;
-    const float PACMAN_SPEED = 3.;
-    const float GHOST_SPEED = 2.7;
+    const float PACMAN_SPEED = 2.;
+    const float GHOST_SPEED = 1.7;
 };
 
 struct Config

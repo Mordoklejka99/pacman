@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <thread>
+#include <cmath>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -103,7 +103,7 @@ Position::Position()
     this->c = 0;
     this->r = 0;
 }
-Position::Position(uint c, uint r)
+Position::Position(int c, int r)
 {
     this->c = c;
     this->r = r;
@@ -131,6 +131,14 @@ Position Position::operator+(sf::Vector2f rval)
 {
     return Position(this->c + int(rval.x), this->r + int(rval.y));
 }
+Position Position::operator-(Position rval)
+{
+    return Position(this->c - rval.c, this->r - rval.r);
+}
+Position Position::operator-(sf::Vector2f rval)
+{
+    return Position(this->c - int(rval.x), this->r - int(rval.y));
+}
 Position Position::operator%(sf::Vector2i rval)
 {
     return Position(this->c % rval.x, this->r % rval.y);
@@ -145,6 +153,12 @@ std::ostream& operator<<(std::ostream& out, Position rval)
 {
     out << rval.c << " " << rval.r;
     return out;
+}
+
+
+uint distance(Position lhv, Position rhv)
+{
+    return uint(sqrt((lhv.c - rhv.c) * (lhv.c - rhv.c) - (lhv.r - rhv.r) * (lhv.r - rhv.r)));
 }
 
 
@@ -237,13 +251,13 @@ bool loadMap(MapData& mapData)
 
         // calculating sizes in pixels
         float tileSize = CONFIG.resolution.width / mapData.width;
-        if(tileSize > CONFIG.resolution.height / (mapData.height + 40. / 7.))
-            tileSize = CONFIG.resolution.height / (mapData.height + 40. / 7.);
+        if(tileSize > CONFIG.resolution.height / (mapData.height + 20. / 7.))
+            tileSize = CONFIG.resolution.height / (mapData.height + 20. / 7.);
 
         DEFINES.TILE_SIZE = int(tileSize);
 
         // setting hud margin
-        DEFINES.HUD_MARGIN = int(40. * tileSize / 7);
+        DEFINES.HUD_MARGIN = int(20. * tileSize / 7);
 
         // calculating side margin
         DEFINES.SIDE_MARGIN = (CONFIG.resolution.width - DEFINES.TILE_SIZE * mapData.width) / 2;
@@ -276,11 +290,11 @@ bool loadMap(MapData& mapData)
         mapData.dotCount = 0;
 
         const Json::Value mapStringArray = map["map"];
-        for(uint c = 0; c < mapData.width; c++)
+        for(int c = 0; c < mapData.width; c++)
         {
             mapData.tiles[c] = new Tile*[mapData.height];
             mapData.map[c] = new int[mapData.height];
-            for(uint r = 0; r < mapData.height; r++)
+            for(int r = 0; r < mapData.height; r++)
             {
                 char tile = mapStringArray[r].asString()[c];
                 Position position = {c, r};
@@ -304,6 +318,10 @@ bool loadMap(MapData& mapData)
                     break;
                 case '#':
                     mapData.tiles[c][r] = new Tile(position, TileContents::wall, CONFIG.wallTexture);
+                    mapData.map[c][r] = 0;
+                    break;
+                case 'o':
+                    mapData.tiles[c][r] = new Tile(position, TileContents::none);
                     mapData.map[c][r] = 0;
                     break;
                 case 'd':

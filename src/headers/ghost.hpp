@@ -16,6 +16,7 @@ protected:
     Direction moveDirection;
     float speed;
     bool hasMoved;
+    bool changedTile;
     sf::Sprite* sprite;
     Map& map;
     Pacman& pacman;
@@ -47,6 +48,52 @@ protected:
     void dijkstra(Position position);
     virtual Position getDestination() const = 0;
     Direction chooseDirection();
+};
+
+
+class Blinky : public Ghost
+{
+public:
+    // ctor
+    Blinky(MapData& mapData, Map& map, Pacman& pacman);
+
+private:
+    virtual Position getDestination() const override;
+};
+
+
+class Pinky : public Ghost
+{
+public:
+    // ctor
+    Pinky(MapData& mapData, Map& map, Pacman& pacman);
+
+private:
+    virtual Position getDestination() const override;
+};
+
+
+class Inky : public Ghost
+{
+private:
+    Blinky& blinky;
+public:
+    // ctor
+    Inky(MapData& mapData, Map& map, Pacman& pacman, Blinky& blinky);
+
+private:
+    virtual Position getDestination() const override;
+};
+
+
+class Clyde : public Ghost
+{
+public:
+    // ctor
+    Clyde(MapData& mapData, Map& map, Pacman& pacman);
+
+private:
+    virtual Position getDestination() const override;
 };
 
 #endif

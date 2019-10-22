@@ -15,6 +15,7 @@
 #include "headers/pacman.hpp"
 
 
+// Ghost
 // ctor
 Ghost::Ghost(MapData& mapData, Map& map, Pacman& pacman, sf::Texture* texture) : map(map), pacman(pacman)
 {
@@ -29,6 +30,7 @@ Ghost::Ghost(MapData& mapData, Map& map, Pacman& pacman, sf::Texture* texture) :
     this->speed = DEFINES.GHOST_SPEED * this->sprite->getScale().x;
     this->moveDirection = Direction::none;
     this->hasMoved = false;
+    this->changedTile = false;
 }
 
 
@@ -101,6 +103,7 @@ void Ghost::move()
             this->position = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + Directions[int(dir)])
                                 % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
             this->coords = this->map(this->position).getCoords() + currTile.getCoords() - this->coords;
+            this->changedTile = true;
         }
 
         // if moving towards center of the map and passed tile edge, update position
@@ -110,6 +113,7 @@ void Ghost::move()
             || center.y > currTile.getCoords().y + DEFINES.TILE_SIZE)
         {
             this->position += Directions[int(dir)];
+            this->changedTile = true;
         }
     }
     // if about to hit the wall, STOP
@@ -131,6 +135,7 @@ void Ghost::move()
             || this->coords.y + DEFINES.TILE_SIZE / 2 > currTile.getCoords().y + DEFINES.TILE_SIZE)
         {
             this->position += Directions[int(dir)];
+            this->changedTile = true;
         }
     }
 
@@ -224,6 +229,7 @@ void Ghost::wallDijkstra(std::queue<std::pair<Position, int>>& tileQueue, Positi
                     tileQueue.push(std::make_pair(pos.first + dir, closestTile));
                     continue;
                 }
+                // add wall tile adjacent in dir
                 if(!foundTile && this->bMap[pos.first.c + int(dir.x)][pos.first.r + int(dir.y)] == 0)
                 {
                     wallQueue.push(std::make_pair(pos.first + dir, pos.second + 1));
@@ -235,39 +241,16 @@ void Ghost::wallDijkstra(std::queue<std::pair<Position, int>>& tileQueue, Positi
 
 void Ghost::offMapDijkstra(std::queue<std::pair<Position, int>>& tileQueue, Position destination)
 {
-    std::queue<std::pair<Position, int>> offMapQueue;
-    offMapQueue.push(std::make_pair(destination, 0));
-
-    uint closestTile = INT32_MAX;
-    bool foundTile = false;
-
-    while(offMapQueue.size())
-    {
-        auto pos = offMapQueue.front();
-        offMapQueue.pop();
-
-        // for every adjacent tile
-        for(auto dir : Directions)
-        {
-            // don't process tiles that are further from map
-            if(abs(pos.first.c + int(dir.x)) > abs(pos.first.c) || abs(pos.first.r + int(dir.y)) > abs(pos.first.r))
-                continue;
-            
-            // add not-off-map tile (wall or tunel) adjacent in dir
-            if(!this->map.offTheMap(pos.first + dir) && pos.second + 1u <= closestTile)
-            {
-                foundTile = true;
-                closestTile = pos.second + 1;
-                this->wallDijkstra(tileQueue, pos.first + dir);
-                continue;
-            }
-            // add off-map tile adjacent in dir
-            if(!foundTile)
-            {
-                offMapQueue.push(std::make_pair(pos.first + dir, pos.second + 1));
-            }
-        }
-    }
+    auto currPos = std::make_pair(destination, 0);
+    while(currPos.first.c < 0)
+        currPos = std::make_pair(currPos.first + Position(1, 0), currPos.second + 1);
+    while(currPos.first.r < 0)
+        currPos = std::make_pair(currPos.first + Position(0, 1), currPos.second + 1);
+    while(currPos.first.c >= this->map.getWidth())
+        currPos = std::make_pair(currPos.first - Position(1, 0), currPos.second + 1);
+    while(currPos.first.r >= this->map.getHeight())
+        currPos = std::make_pair(currPos.first - Position(0, 1), currPos.second + 1);
+    this->wallDijkstra(tileQueue, currPos.first);
 }
 
 void Ghost::dijkstra(Position destination)
@@ -278,7 +261,7 @@ void Ghost::dijkstra(Position destination)
 
     if(this->map.offTheMap(destination))
         this->offMapDijkstra(tileQueue, destination);
-    else if(this->map(destination).isWall())
+    else if(this->bMap[destination.c][destination.r] == 0)
         this->wallDijkstra(tileQueue, destination);
     else
         tileQueue.push(std::make_pair(destination, 0));
@@ -323,12 +306,16 @@ void Ghost::dijkstra(Position destination)
 
 Direction Ghost::chooseDirection()
 {
+    // don't turn if hadn't move to another tile after last turn
+    if(!this->changedTile && this->moveDirection != Direction::none)
+        return this->moveDirection;
+
     Tile& currTile = this->map(this->position);
     Direction shortestDir = this->moveDirection;
     int shortestLen = INT32_MAX;
     Position backPos = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + -Directions[int(shortestDir)])
                         % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
-    if(this->map(backPos).isWall())
+    if(this->bMap[backPos.c][backPos.r] == 0)
         this->dijkstra(this->getDestination());
     else
     {
@@ -337,19 +324,19 @@ Direction Ghost::chooseDirection()
         this->bMap[backPos.c][backPos.r] = 1;
     }
 
-    // std::cerr << "vvvvvvvvvvvvvvvvvvvv" << std::endl;
-    // for(uint r = 0; r < this->map.getHeight(); r++)
-    // {
-    //     for(uint c = 0; c < this->map.getWidth(); c++)
-    //     {
-    //         std::cerr << std::setw(3);
-    //         if(this->iMap[c][r] == INT32_MAX)
-    //             std::cerr << '#';
-    //         else
-    //             std::cerr << this->iMap[c][r];
-    //     }
-    //     std::cerr << std::endl;
-    // }
+    std::cerr << "vvvvvvvvvvvvvvvvvvvv" << std::endl;
+    for(uint r = 0; r < this->map.getHeight(); r++)
+    {
+        for(uint c = 0; c < this->map.getWidth(); c++)
+        {
+            std::cerr << std::setw(3);
+            if(this->iMap[c][r] == INT32_MAX)
+                std::cerr << '#';
+            else
+                std::cerr << this->iMap[c][r];
+        }
+        std::cerr << std::endl;
+    }
 
     for(int i = 1; i < int(Direction::nOfDirections); i++)
     {
@@ -373,6 +360,7 @@ Direction Ghost::chooseDirection()
             {
                 shortestLen = this->iMap[pos.c][pos.r];
                 shortestDir = Direction(i);
+                this->changedTile = false;
             }
         }
         catch(...)
@@ -380,12 +368,82 @@ Direction Ghost::chooseDirection()
             //
         }
     }
-    // std::cerr << int(shortestDir) << std::endl;
-    // std::cerr << "^^^^^^^^^^^^^^^^^^^^" << std::endl;
+    std::cerr << int(shortestDir) << std::endl;
+    std::cerr << "^^^^^^^^^^^^^^^^^^^^" << std::endl;
     return shortestDir;
 }
 
 void Ghost::draw(sf::RenderWindow& window) const
 {
     window.draw(*this->sprite);
+}
+
+
+// Blinky
+// ctor
+Blinky::Blinky(MapData& mapData, Map& map, Pacman& pacman) : Ghost(mapData, map, pacman, CONFIG.blinkyTexture)
+{
+    this->coords = mapData.blinky.coords;
+    this->sprite->setPosition(this->coords.x, this->coords.y);
+}
+
+// methods
+Position Blinky::getDestination() const
+{
+    return this->pacman.getPosition();
+}
+
+
+// Pinky
+// ctor
+Pinky::Pinky(MapData& mapData, Map& map, Pacman& pacman) : Ghost(mapData, map, pacman, CONFIG.pinkyTexture)
+{
+    this->coords = mapData.pinky.coords;
+    this->sprite->setPosition(this->coords.x, this->coords.y);
+}
+
+// methods
+Position Pinky::getDestination() const
+{
+    return this->pacman.getPosition() + 4 * Directions[int(this->pacman.getFaceDirection())];
+}
+
+
+// Inky
+// ctor
+Inky::Inky(MapData& mapData, Map& map, Pacman& pacman, Blinky& blinky)
+        : Ghost(mapData, map, pacman, CONFIG.inkyTexture), blinky(blinky)
+{
+    this->coords = mapData.inky.coords;
+    this->sprite->setPosition(this->coords.x, this->coords.y);
+}
+
+// methods
+Position Inky::getDestination() const
+{
+    Position offsetPos = this->pacman.getPosition() + 2 * Directions[int(this->pacman.getFaceDirection())];
+    Position diff = offsetPos - this->blinky.getPosition();
+    std::cerr << "Inky:" << std::endl;
+    std::cerr << "\tIs at: " << this->position.c << " " << this->position.r << std::endl;
+    std::cerr << "\tGoing: " << int(this->moveDirection) << std::endl;
+    std::cerr << "\tTarget at: " << (offsetPos + diff).c << " " << (offsetPos + diff).r << std::endl;
+    return offsetPos + diff;
+}
+
+
+// Clyde
+// ctor
+Clyde::Clyde(MapData& mapData, Map& map, Pacman& pacman) : Ghost(mapData, map, pacman, CONFIG.clydeTexture)
+{
+    this->coords = mapData.clyde.coords;
+    this->sprite->setPosition(this->coords.x, this->coords.y);
+}
+
+// methods
+Position Clyde::getDestination() const
+{
+    if(distance(this->position, this->pacman.getPosition()) > 8)
+        return this->pacman.getPosition();
+    else
+        return Position(0, this->map.getHeight());
 }

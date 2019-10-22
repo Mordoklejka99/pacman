@@ -12,6 +12,7 @@ OBJ = $(ODIR)/main.o \
       $(ODIR)/config.o \
       $(ODIR)/jsoncpp.o \
       $(ODIR)/pacman.o \
+      $(ODIR)/ghost.o \
       $(ODIR)/map.o \
       $(ODIR)/tile.o
 
@@ -56,9 +57,14 @@ DEPS7 = $(patsubst %, $(HDIR)/%, $(_DEPS7))
 $(ODIR)/pacman.o: src/pacman.cpp $(DEPS7)
 	$(C) -c -o $@ $< $(FLAGS)
 
-_DEPS8 = game.hpp config.hpp handlers.hpp pacman.hpp map.hpp tile.hpp
+_DEPS8 = ghost.hpp config.hpp map.hpp tile.hpp pacman.hpp
 DEPS8 = $(patsubst %, $(HDIR)/%, $(_DEPS8))
-$(ODIR)/game.o: src/game.cpp $(DEPS8)
+$(ODIR)/ghost.o: src/ghost.cpp $(DEPS8)
+	$(C) -c -o $@ $< $(FLAGS)
+
+_DEPS13 = game.hpp config.hpp handlers.hpp pacman.hpp ghost.hpp map.hpp tile.hpp
+DEPS13 = $(patsubst %, $(HDIR)/%, $(_DEPS13))
+$(ODIR)/game.o: src/game.cpp $(DEPS13)
 	$(C) -c -o $@ $< $(FLAGS)
 
 clean:

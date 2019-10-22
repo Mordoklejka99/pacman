@@ -238,7 +238,5 @@ bool Pacman::isAtBorder()
 
 void Pacman::draw(sf::RenderWindow& window) const
 {
-    # warning debug output
-    std::cerr << int(this->moveDirection) << std::endl;
     window.draw(*this->sprite);
 }
