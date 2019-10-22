@@ -35,6 +35,7 @@ public:
     void operator--(int);
 
     // methods
+    bool offTheMap(Position position) const noexcept;
     void draw(sf::RenderWindow& window);
 };
 

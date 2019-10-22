@@ -11,6 +11,7 @@ private:
     Coords coords;
     Position position;
     Direction moveDirection;
+    Direction faceDirection;
     Direction plannedTurn;
     float speed;
     uint score;
@@ -30,6 +31,7 @@ public:
     Coords getCoords() const;
     Position getPosition() const;
     Direction getMoveDirection() const;
+    Direction getFaceDirection() const;
     bool hasMoved() const;
     bool isDead() const;
     uint getScore() const;

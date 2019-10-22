@@ -52,16 +52,15 @@ uint Map::getDotCount()
 // operators
 Tile& Map::operator()(uint col, uint row)
 {
-    if(col >= this->width || row >= this->height)
-        throw("Invalid indices for Map::operator()");
+    if(this->offTheMap(Position(col, row)))
+        throw InvalidTilePositionException();
     return *(this->tiles[col][row]);
 }
 
 Tile& Map::operator()(Position position)
 {
-    if(position.c < 0 || position.c >= this->width
-        || position.r < 0 || position.r >= this->height)
-        throw("Invalid indices for Map::operator()");
+    if(this->offTheMap(position))
+        throw InvalidTilePositionException();
     return *(this->tiles[position.c][position.r]);
 }
 
@@ -71,6 +70,11 @@ void Map::operator--(int)
 }
 
 // methods
+bool Map::offTheMap(Position position) const noexcept
+{
+    return position.c < 0 || position.c >= this->width || position.r < 0 || position.r >= this->height;
+}
+
 void Map::draw(sf::RenderWindow& window)
 {
     for(uint c = 0; c < this->width; c++)

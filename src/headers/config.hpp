@@ -2,6 +2,7 @@
 #define CONFIG_HPP
 
 // #include <SFML/Graphics.hpp>
+#include <exception>
 
 using uint = unsigned int;
 
@@ -34,6 +35,15 @@ enum class Direction
     up,
     down,
     nOfDirections
+};
+
+class InvalidTilePositionException : public std::exception
+{
+public:
+    const char* what() const throw()
+    {
+        return "Invalid tile position";
+    }
 };
 
 struct Coords
@@ -137,7 +147,7 @@ struct MapData
     } clyde;
     Tile*** tiles;
     uint dotCount;
-    bool** map;
+    int** map;
 };
 
 bool loadConfigFile();

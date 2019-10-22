@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <queue>
+#include <cmath>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -70,12 +71,18 @@ void Ghost::move()
         return;
     
     if(!this->hasMoved)
-        this->findTilePosition(this->coords + sf::Vector2f(1, 0));
+    {
+        for(auto dir : Directions)
+        {
+            bool found = this->findTilePosition(this->coords + dir);
+            if(found)
+                break;
+        }
+    }
 
     // to shorten conditions at least a bit
     Tile& currTile = this->map(this->position);
     Direction dir = this->moveDirection = this->chooseDirection();
-    std::cerr << "\t" << int(dir) << std::endl;
 
     // move
     // if there's a tunel, go through it
@@ -184,50 +191,130 @@ void Ghost::zeroiMap()
             this->iMap[c][r] = INT32_MAX;
 }
 
-void Ghost::dijkstra(Position position)
+void Ghost::wallDijkstra(std::queue<std::pair<Position, int>>& tileQueue, Position destination)
 {
-    this->zeroiMap();
+    std::queue<std::pair<Position, int>> wallQueue;
+    wallQueue.push(std::make_pair(destination, 0));
 
-    Position pPosition = position;
-    std::queue<std::pair<Position, int> > q;
-    q.push(std::make_pair(pPosition, 0));
-    
-    while(q.size())
+    uint closestTile = INT32_MAX;
+    bool foundTile = false;
+
+    while(wallQueue.size())
     {
-        auto pos = q.front();
-        q.pop();
+        auto pos = wallQueue.front();
+        wallQueue.pop();
 
+        // if found better path to tile, proceed
         if(pos.second < this->iMap[pos.first.c][pos.first.r])
         {
             this->iMap[pos.first.c][pos.first.r] = pos.second;
+
+            // for every adjacent tile
             for(auto dir : Directions)
             {
-                try
+                // don't process tile that's off the map
+                if(this->map.offTheMap(pos.first + dir))
+                    continue;
+
+                // add closest to destination non-wall tile
+                if(this->bMap[pos.first.c + int(dir.x)][pos.first.r + int(dir.y)] == 1 && pos.second + 1u <= closestTile)
                 {
-                    if(this->map(pos.first).isTunel()
-                        && (pos.first.c + dir.x < 0
-                                || pos.first.c + dir.x > this->map.getWidth() - 1
-                                || pos.first.r + dir.y < 0
-                                || pos.first.r + dir.y > this->map.getHeight() - 1))
-                    {
-                        Position p = (pos.first + Position(this->map.getWidth(), this->map.getHeight()) + dir)
-                                        % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
-                        q.push(std::make_pair(p, pos.second + 1));
-                    }
-                    // if(!this->map(pos.first + dir).isWall())
-                    if(pos.first.c + dir.x < 0
-                        || pos.first.c + dir.x > this->map.getWidth() - 1
-                        || pos.first.r + dir.y < 0
-                        || pos.first.r + dir.y > this->map.getHeight() - 1)
-                        continue;
-                    if(this->bMap[pos.first.c + int(dir.x)][pos.first.r + int(dir.y)])
-                    {
-                        q.push(std::make_pair(pos.first + dir, pos.second + 1));
-                    }
+                    foundTile = true;
+                    closestTile = pos.second + 1;
+                    tileQueue.push(std::make_pair(pos.first + dir, closestTile));
+                    continue;
                 }
-                catch(...)
+                if(!foundTile && this->bMap[pos.first.c + int(dir.x)][pos.first.r + int(dir.y)] == 0)
                 {
-                    //
+                    wallQueue.push(std::make_pair(pos.first + dir, pos.second + 1));
+                }
+            }
+        }
+    }
+}
+
+void Ghost::offMapDijkstra(std::queue<std::pair<Position, int>>& tileQueue, Position destination)
+{
+    std::queue<std::pair<Position, int>> offMapQueue;
+    offMapQueue.push(std::make_pair(destination, 0));
+
+    uint closestTile = INT32_MAX;
+    bool foundTile = false;
+
+    while(offMapQueue.size())
+    {
+        auto pos = offMapQueue.front();
+        offMapQueue.pop();
+
+        // for every adjacent tile
+        for(auto dir : Directions)
+        {
+            // don't process tiles that are further from map
+            if(abs(pos.first.c + int(dir.x)) > abs(pos.first.c) || abs(pos.first.r + int(dir.y)) > abs(pos.first.r))
+                continue;
+            
+            // add not-off-map tile (wall or tunel) adjacent in dir
+            if(!this->map.offTheMap(pos.first + dir) && pos.second + 1u <= closestTile)
+            {
+                foundTile = true;
+                closestTile = pos.second + 1;
+                this->wallDijkstra(tileQueue, pos.first + dir);
+                continue;
+            }
+            // add off-map tile adjacent in dir
+            if(!foundTile)
+            {
+                offMapQueue.push(std::make_pair(pos.first + dir, pos.second + 1));
+            }
+        }
+    }
+}
+
+void Ghost::dijkstra(Position destination)
+{
+    this->zeroiMap();
+
+    std::queue<std::pair<Position, int>> tileQueue;
+
+    if(this->map.offTheMap(destination))
+        this->offMapDijkstra(tileQueue, destination);
+    else if(this->map(destination).isWall())
+        this->wallDijkstra(tileQueue, destination);
+    else
+        tileQueue.push(std::make_pair(destination, 0));
+    
+    while(tileQueue.size())
+    {
+        auto pos = tileQueue.front();
+        tileQueue.pop();
+
+        // if found better path to tile, proceed
+        if(pos.second < this->iMap[pos.first.c][pos.first.r])
+        {
+            this->iMap[pos.first.c][pos.first.r] = pos.second;
+
+            // for every adjacent tile
+            for(auto dir : Directions)
+            {
+                // add tile the other side of a tunel
+                if(this->map(pos.first).isTunel()
+                    && (pos.first.c + dir.x < 0
+                            || pos.first.c + dir.x > this->map.getWidth() - 1
+                            || pos.first.r + dir.y < 0
+                            || pos.first.r + dir.y > this->map.getHeight() - 1))
+                {
+                    Position p = (pos.first + Position(this->map.getWidth(), this->map.getHeight()) + dir)
+                                    % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
+                    tileQueue.push(std::make_pair(p, pos.second + 1));
+                    continue;
+                }
+                // do not add tile that's outside of the map
+                if(this->map.offTheMap(pos.first + dir))
+                    continue;
+                // add tile adjecent in dir
+                if(this->bMap[pos.first.c + int(dir.x)][pos.first.r + int(dir.y)] == 1)
+                {
+                    tileQueue.push(std::make_pair(pos.first + dir, pos.second + 1));
                 }
             }
         }
@@ -245,26 +332,24 @@ Direction Ghost::chooseDirection()
         this->dijkstra(this->getDestination());
     else
     {
-        this->bMap[backPos.c][backPos.r] = false;
-        // this->bMap[this->position.c - int(Directions[int(shortestDir)].x)][this->position.r - int(Directions[int(shortestDir)].y)] = false;
+        this->bMap[backPos.c][backPos.r] = 2;
         this->dijkstra(this->getDestination());
-        this->bMap[backPos.c][backPos.r] = true;
-        // this->bMap[this->position.c - int(Directions[int(shortestDir)].x)][this->position.r - int(Directions[int(shortestDir)].y)] = true;
+        this->bMap[backPos.c][backPos.r] = 1;
     }
 
-    std::cerr << "vvvvvvvvvvvvvvvvvvvv" << std::endl;
-    for(uint r = 0; r < this->map.getHeight(); r++)
-    {
-        for(uint c = 0; c < this->map.getWidth(); c++)
-        {
-            std::cerr << std::setw(3);
-            if(this->iMap[c][r] == INT32_MAX)
-                std::cerr << '#';
-            else
-                std::cerr << this->iMap[c][r];
-        }
-        std::cerr << std::endl;
-    }
+    // std::cerr << "vvvvvvvvvvvvvvvvvvvv" << std::endl;
+    // for(uint r = 0; r < this->map.getHeight(); r++)
+    // {
+    //     for(uint c = 0; c < this->map.getWidth(); c++)
+    //     {
+    //         std::cerr << std::setw(3);
+    //         if(this->iMap[c][r] == INT32_MAX)
+    //             std::cerr << '#';
+    //         else
+    //             std::cerr << this->iMap[c][r];
+    //     }
+    //     std::cerr << std::endl;
+    // }
 
     for(int i = 1; i < int(Direction::nOfDirections); i++)
     {
@@ -278,11 +363,13 @@ Direction Ghost::chooseDirection()
             Position pos = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + dir)
                                 % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
 
-            if(this->iMap[pos.c][pos.r] < shortestLen
-                && this->coords.x < currTile.getCoords().x + 2
+            if(!this->map(pos).isWall()
+                && this->iMap[pos.c][pos.r] < shortestLen
+                && (this->moveDirection == Direction::none
+                || (this->coords.x < currTile.getCoords().x + 2
                 && this->coords.x > currTile.getCoords().x - 2
                 && this->coords.y < currTile.getCoords().y + 2
-                && this->coords.y > currTile.getCoords().y - 2)
+                && this->coords.y > currTile.getCoords().y - 2)))
             {
                 shortestLen = this->iMap[pos.c][pos.r];
                 shortestDir = Direction(i);
@@ -293,8 +380,8 @@ Direction Ghost::chooseDirection()
             //
         }
     }
-    std::cerr << int(shortestDir) << std::endl;
-    std::cerr << "^^^^^^^^^^^^^^^^^^^^" << std::endl;
+    // std::cerr << int(shortestDir) << std::endl;
+    // std::cerr << "^^^^^^^^^^^^^^^^^^^^" << std::endl;
     return shortestDir;
 }
 

@@ -1,6 +1,8 @@
 #ifndef GHOST_HPP
 #define GHOST_HPP
 
+#include <utility>
+#include <queue>
 #include "config.hpp"
 
 class Map;
@@ -17,7 +19,7 @@ protected:
     sf::Sprite* sprite;
     Map& map;
     Pacman& pacman;
-    bool** bMap;
+    int** bMap;
     int** iMap;
 
 public:
@@ -40,6 +42,8 @@ protected:
     bool findTilePosition(Coords coords);
     bool isAtBorder() const;
     void zeroiMap();
+    void wallDijkstra(std::queue<std::pair<Position, int>>& q, Position position);
+    void offMapDijkstra(std::queue<std::pair<Position, int>>& q, Position position);
     void dijkstra(Position position);
     virtual Position getDestination() const = 0;
     Direction chooseDirection();

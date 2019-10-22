@@ -272,14 +272,14 @@ bool loadMap(MapData& mapData)
     {
         // map layout loading
         mapData.tiles = new Tile**[mapData.width];
-        mapData.map = new bool*[mapData.width];
+        mapData.map = new int*[mapData.width];
         mapData.dotCount = 0;
 
         const Json::Value mapStringArray = map["map"];
         for(uint c = 0; c < mapData.width; c++)
         {
             mapData.tiles[c] = new Tile*[mapData.height];
-            mapData.map[c] = new bool[mapData.height];
+            mapData.map[c] = new int[mapData.height];
             for(uint r = 0; r < mapData.height; r++)
             {
                 char tile = mapStringArray[r].asString()[c];
@@ -288,11 +288,11 @@ bool loadMap(MapData& mapData)
                 {
                 case ' ':
                     mapData.tiles[c][r] = new Tile(position, TileContents::none);
-                    mapData.map[c][r] = true;
+                    mapData.map[c][r] = 1;
                     break;
                 case 't':
                     mapData.tiles[c][r] = new Tile(position, TileContents::tunel);
-                    mapData.map[c][r] = true;
+                    mapData.map[c][r] = 1;
                     break;
                 case '.':
                     mapData.tiles[c][r] = new Tile(position, TileContents::dot, CONFIG.dotTexture);
@@ -300,15 +300,15 @@ bool loadMap(MapData& mapData)
                     break;
                 case '*':
                     mapData.tiles[c][r] = new Tile(position, TileContents::superDot, CONFIG.superDotTexture);
-                    mapData.map[c][r] = true;
+                    mapData.map[c][r] = 1;
                     break;
                 case '#':
                     mapData.tiles[c][r] = new Tile(position, TileContents::wall, CONFIG.wallTexture);
-                    mapData.map[c][r] = false;
+                    mapData.map[c][r] = 0;
                     break;
                 case 'd':
                     mapData.tiles[c][r] = new Tile(position, TileContents::ghosthouseDoor, CONFIG.wallTexture);
-                    mapData.map[c][r] = true;
+                    mapData.map[c][r] = 1;
                     break;
                 }
             }

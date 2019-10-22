@@ -22,7 +22,7 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
     this->sprite->setPosition(this->coords.x, this->coords.y);
 
     this->speed = DEFINES.PACMAN_SPEED * this->sprite->getScale().x;
-    this->moveDirection = Direction::none;
+    this->faceDirection = this->moveDirection = Direction::none;
     this->moved = false;
 }
 
@@ -49,6 +49,11 @@ Position Pacman::getPosition() const
 Direction Pacman::getMoveDirection() const
 {
     return this->moveDirection;
+}
+
+Direction Pacman::getFaceDirection() const
+{
+    return this->faceDirection;
 }
 
 bool Pacman::hasMoved() const
@@ -79,7 +84,7 @@ void Pacman::turn(Direction dir)
     {
         if(this->findTilePosition(this->coords + Directions[int(dir)]))
         {
-            this->moveDirection = this->plannedTurn = dir;
+            this->faceDirection = this->moveDirection = this->plannedTurn = dir;
             this->moved = true;
         }
     }
@@ -101,7 +106,7 @@ void Pacman::move()
         if(!this->map(this->position + Directions[int(dir)]).isWall()
             && Directions[int(dir)] == -Directions[int(this->moveDirection)])
         {
-            this->moveDirection = dir;
+            this->faceDirection = this->moveDirection = dir;
         }
         else if(!this->map(this->position + Directions[int(dir)]).isWall()
             && this->coords.x < currTile.getCoords().x + 2
@@ -111,7 +116,7 @@ void Pacman::move()
             && dir != this->moveDirection)
         {
             this->coords = currTile.getCoords();
-            this->moveDirection = dir;
+            this->faceDirection = this->moveDirection = dir;
         }
     }
     catch(...)
@@ -233,5 +238,7 @@ bool Pacman::isAtBorder()
 
 void Pacman::draw(sf::RenderWindow& window) const
 {
+    # warning debug output
+    std::cerr << int(this->moveDirection) << std::endl;
     window.draw(*this->sprite);
 }
