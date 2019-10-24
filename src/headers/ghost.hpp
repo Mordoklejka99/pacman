@@ -14,14 +14,19 @@ protected:
     Coords coords;
     Position position;
     Direction moveDirection;
+    Direction plannedTurn;
+    GhostMode mode;
     float speed;
     bool hasMoved;
     bool changedTile;
+    bool isDead;
+    bool wasDead;
     sf::Sprite* sprite;
     Map& map;
     Pacman& pacman;
     int** bMap;
     int** iMap;
+    sf::Clock timer;
 
 public:
     // ctor
@@ -40,13 +45,14 @@ public:
     void draw(sf::RenderWindow& window) const;
 
 protected:
-    bool findTilePosition(Coords coords);
+    bool findTilePosition(Direction dir);
     bool isAtBorder() const;
     void zeroiMap();
     void wallDijkstra(std::queue<std::pair<Position, int>>& q, Position position);
     void offMapDijkstra(std::queue<std::pair<Position, int>>& q, Position position);
     void dijkstra(Position position);
     virtual Position getDestination() const = 0;
+    virtual bool mayLeave() const = 0;
     Direction chooseDirection();
 };
 
@@ -59,6 +65,7 @@ public:
 
 private:
     virtual Position getDestination() const override;
+    virtual bool mayLeave() const override;
 };
 
 
@@ -70,6 +77,7 @@ public:
 
 private:
     virtual Position getDestination() const override;
+    virtual bool mayLeave() const override;
 };
 
 
@@ -83,6 +91,7 @@ public:
 
 private:
     virtual Position getDestination() const override;
+    virtual bool mayLeave() const override;
 };
 
 
@@ -94,6 +103,7 @@ public:
 
 private:
     virtual Position getDestination() const override;
+    virtual bool mayLeave() const override;
 };
 
 #endif

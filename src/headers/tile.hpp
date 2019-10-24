@@ -34,9 +34,11 @@ public:
 
     // methods
     bool isWall();
+    bool isGhosthouseDoor();
     bool isTunel();
     bool containsDot();
     bool containsSuperDot();
+    bool containsGhost();
     void draw(sf::RenderWindow& window);
 };
 

@@ -43,6 +43,14 @@ enum class Direction
     nOfDirections
 };
 
+enum class GhostMode
+{
+    idle = 0,
+    chase,
+    scatter,
+    frightened
+};
+
 class InvalidTilePositionException : public std::exception
 {
 public:
@@ -95,8 +103,6 @@ struct Position
     friend std::ostream& operator<<(std::ostream& out, Position rval);
 };
 
-uint distance(Position lhv, Position rhv);
-
 enum class TileContents
 {
     none,
@@ -133,8 +139,8 @@ struct Config
 
 struct MapData
 {
-    uint width;
-    uint height;
+    int width;
+    int height;
     struct
     {
         Coords coords;
@@ -156,9 +162,11 @@ struct MapData
         Coords coords;
     } clyde;
     Tile*** tiles;
-    uint dotCount;
+    int dotCount;
     int** map;
 };
+
+int distance(Position lhv, Position rhv);
 
 bool loadConfigFile();
 bool loadTextures();

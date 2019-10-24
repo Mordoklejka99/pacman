@@ -14,7 +14,7 @@ private:
     Direction faceDirection;
     Direction plannedTurn;
     float speed;
-    uint score;
+    int score;
     bool dead;
     bool moved;
     sf::Sprite* sprite;
@@ -34,7 +34,7 @@ public:
     Direction getFaceDirection() const;
     bool hasMoved() const;
     bool isDead() const;
-    uint getScore() const;
+    int getScore() const;
 
     // methods
     void turn(Direction dir);

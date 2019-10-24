@@ -19,10 +19,10 @@ MapData mapData;
 sf::Vector2f Directions[] =
 {
     sf::Vector2f(0, 0),
-    sf::Vector2f(-1, 0),
-    sf::Vector2f(1, 0),
     sf::Vector2f(0, -1),
-    sf::Vector2f(0, 1)
+    sf::Vector2f(0, 1),
+    sf::Vector2f(-1, 0),
+    sf::Vector2f(1, 0)
 };
 
 // Coords
@@ -156,9 +156,9 @@ std::ostream& operator<<(std::ostream& out, Position rval)
 }
 
 
-uint distance(Position lhv, Position rhv)
+int distance(Position lhv, Position rhv)
 {
-    return uint(sqrt((lhv.c - rhv.c) * (lhv.c - rhv.c) - (lhv.r - rhv.r) * (lhv.r - rhv.r)));
+    return int(sqrt((lhv.c - rhv.c) * (lhv.c - rhv.c) - (lhv.r - rhv.r) * (lhv.r - rhv.r)));
 }
 
 
@@ -170,8 +170,8 @@ bool loadConfigFile()
 
     try
     {
-        CONFIG.resolution.width = config["resolution"]["width"].asUInt();
-        CONFIG.resolution.height = config["resolution"]["height"].asUInt();
+        CONFIG.resolution.width = config["resolution"]["width"].asInt();
+        CONFIG.resolution.height = config["resolution"]["height"].asInt();
         CONFIG.fullscreen = config["fullscreen"].asBool();
     }
     catch(std::exception e)
@@ -246,8 +246,8 @@ bool loadMap(MapData& mapData)
     try
     {
         // map size loading
-        mapData.height = map["height"].asUInt();
-        mapData.width = map["width"].asUInt();
+        mapData.height = map["height"].asInt();
+        mapData.width = map["width"].asInt();
 
         // calculating sizes in pixels
         float tileSize = CONFIG.resolution.width / mapData.width;

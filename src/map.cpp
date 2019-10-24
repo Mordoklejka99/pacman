@@ -17,14 +17,19 @@ Map::Map(MapData& mapData)
     this->height = mapData.height;
 
     this->tiles = mapData.tiles;
+    this->dotCount = this->nOfDots = mapData.dotCount;
+
+    this->pinkyOut = false;
+    this->inkyOut = false;
+    this->clydeOut = false;
 }
 
 // dtor
 Map::~Map()
 {
-    for(uint c = 0; c < this->width; c++)
+    for(int c = 0; c < this->width; c++)
     {
-        for(uint r = 0; r < this->height; r++)
+        for(int r = 0; r < this->height; r++)
         {
             delete this->tiles[c][r];
         }
@@ -34,23 +39,28 @@ Map::~Map()
 }
 
 // getters
-uint Map::getWidth()
+int Map::getWidth()
 {
     return this->width;
 }
 
-uint Map::getHeight()
+int Map::getHeight()
 {
     return this->height;
 }
 
-uint Map::getDotCount()
+int Map::getDotCount()
 {
     return this->dotCount;
 }
 
+int Map::getTotalDotCount()
+{
+    return this->nOfDots;
+}
+
 // operators
-Tile& Map::operator()(uint col, uint row)
+Tile& Map::operator()(int col, int row)
 {
     if(this->offTheMap(Position(col, row)))
         throw InvalidTilePositionException();
@@ -70,16 +80,16 @@ void Map::operator--(int)
 }
 
 // methods
-bool Map::offTheMap(Position position) const noexcept
+bool Map::offTheMap(Position position) const
 {
     return position.c < 0 || position.c >= this->width || position.r < 0 || position.r >= this->height;
 }
 
 void Map::draw(sf::RenderWindow& window)
 {
-    for(uint c = 0; c < this->width; c++)
+    for(int c = 0; c < this->width; c++)
     {
-        for(uint r = 0; r < this->height; r++)
+        for(int r = 0; r < this->height; r++)
         {
             (this->tiles[c][r])->draw(window);
         }

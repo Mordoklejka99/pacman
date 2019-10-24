@@ -95,6 +95,11 @@ bool Tile::isWall()
     return this->content == TileContents::wall || this->content == TileContents::ghosthouseDoor;
 }
 
+bool Tile::isGhosthouseDoor()
+{
+    return this->content == TileContents::ghosthouseDoor;
+}
+
 bool Tile::isTunel()
 {
     return this->content == TileContents::tunel;
@@ -108,6 +113,11 @@ bool Tile::containsDot()
 bool Tile::containsSuperDot()
 {
     return this->content == TileContents::superDot;
+}
+
+bool Tile::containsGhost()
+{
+    return this->ghost;
 }
 
 void Tile::draw(sf::RenderWindow& window)

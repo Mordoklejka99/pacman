@@ -24,6 +24,7 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
     this->speed = DEFINES.PACMAN_SPEED * this->sprite->getScale().x;
     this->faceDirection = this->moveDirection = Direction::none;
     this->moved = false;
+    this->dead = false;
 }
 
 
@@ -66,7 +67,7 @@ bool Pacman::isDead() const
     return this->dead;
 }
 
-uint Pacman::getScore() const
+int Pacman::getScore() const
 {
     return this->score;
 }
@@ -184,16 +185,22 @@ void Pacman::move()
     {
         this->score += 10;
         this->map--;
+        this->map.timer.restart();
     }
     else if(newCurrTile.containsSuperDot())
     {
         this->score += 50;
         this->map--;
+        this->map.timer.restart();
     }
     if(&currTile != &newCurrTile)
     {
         currTile.setPacman(false);
         newCurrTile.setPacman(true);
+    }
+    if(newCurrTile.containsGhost())
+    {
+        this->dead = true;
     }
 
     this->sprite->setPosition(this->coords.x, this->coords.y);
@@ -204,9 +211,9 @@ bool Pacman::findTilePosition(Coords coords)
     // coords of center of pacman
     Coords center(coords + Coords(DEFINES.TILE_SIZE / 2));
 
-    for(uint c = 0; c < this->map.getWidth(); c++)
+    for(int c = 0; c < this->map.getWidth(); c++)
     {
-        for(uint r = 0; r < this->map.getHeight(); r++)
+        for(int r = 0; r < this->map.getHeight(); r++)
         {
             //coords of top left corner of tile
             Coords corner(this->map(c, r).getCoords().x, this->map(c, r).getCoords().y);
