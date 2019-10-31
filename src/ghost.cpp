@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <queue>
 #include <cmath>
+#include <cstdlib>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -146,7 +147,7 @@ void Ghost::move()
             this->moveDirection = dir;
         }
     }
-    catch(...)
+    catch(InvalidTilePositionException)
     {
         //
     }
@@ -286,9 +287,11 @@ void Ghost::changeMode(GhostMode mode)
         }
         break;
     case GhostMode::frightened:
-        if(this->mode != GhostMode::idle && this->mode != GhostMode::dead && this->mode != GhostMode::frightened)
+        if(this->mode != GhostMode::idle && this->mode != GhostMode::dead && this->mode != GhostMode::frightened
+            && !this->map(this->position).isGhosthouse() && !this->map(this->position).isGhosthouseDoor())
         {
             this->mode = mode;
+            this->changedTile = true;
             this->currentSprite = this->frightenedSprite;
             for(int i = 1; i < int(Direction::nOfDirections); i++)
             {
@@ -440,6 +443,40 @@ Direction Ghost::chooseDirection()
         return this->moveDirection;
 
     Tile& currTile = this->map(this->position);
+    
+    if(this->mode == GhostMode::frightened)
+    {
+        if(!(this->coords.x < currTile.getCoords().x + 2
+            && this->coords.x > currTile.getCoords().x - 2
+            && this->coords.y < currTile.getCoords().y + 2
+            && this->coords.y > currTile.getCoords().y - 2))
+        {
+            return this->moveDirection;
+        }
+
+        while(true)
+        {
+            int dir = rand() % (int(Direction::nOfDirections) - 1) + 1;
+            std::cerr << dir << std::endl;
+            try
+            {
+                if(Directions[dir] == -Directions[int(this->moveDirection)]
+                    || this->map(this->position + Directions[dir]).isWall())
+                {
+                    continue;
+                }
+            }
+            catch(InvalidTilePositionException)
+            {
+                if(currTile.isTunel())
+                {
+                    return Direction(dir);
+                }
+            }
+            return Direction(dir);
+        }
+    }
+
     Direction shortestDir = this->moveDirection;
     int shortestLen = INT32_MAX;
     Position backPos = (this->position + Position(this->map.getWidth(), this->map.getHeight()) - Directions[int(shortestDir)])
@@ -451,24 +488,6 @@ Direction Ghost::chooseDirection()
         this->bMap[backPos.c][backPos.r] = 2;
         this->dijkstra(this->getDestination());
         this->bMap[backPos.c][backPos.r] = 1;
-    }
-
-    if(this->mode == GhostMode::dead)
-    {
-        std::cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-        for(int c = 0; c < this->map.getWidth(); c++)
-        {
-            for(int r = 0; r < this->map.getHeight(); r++)
-            {
-                std::cerr << std::setw(3);
-                if(this->iMap[r][c] == INT32_MAX)
-                    std::cerr << '#';
-                else
-                    std::cerr << this->iMap[r][c];
-            }
-            std::cerr << std::endl;
-        }
-        std::cerr << "<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
     }
 
     for(int i = 1; i < int(Direction::nOfDirections); i++)
@@ -496,7 +515,7 @@ Direction Ghost::chooseDirection()
                 this->changedTile = false;
             }
         }
-        catch(...)
+        catch(InvalidTilePositionException)
         {
             //
         }
