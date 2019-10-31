@@ -16,24 +16,32 @@
 #include "headers/pacman.hpp"
 
 
+sf::Clock Ghost::timer = sf::Clock();
+
 // Ghost
 // ctor
-Ghost::Ghost(MapData& mapData, Map& map, Pacman& pacman, sf::Texture* texture) : map(map), pacman(pacman)
+Ghost::Ghost(MapData& mapData, Map& map, Textures textures) : map(map)
 {
     this->bMap = mapData.map;
     this->iMap = new int*[this->map.getHeight()];
     for(int c = 0; c < this->map.getHeight(); c++)
         this->iMap[c] = new int[this->map.getWidth()];
 
-    this->sprite = new sf::Sprite(*texture);
-    this->sprite->setScale(float(DEFINES.TILE_SIZE) / texture->getSize().x, float(DEFINES.TILE_SIZE) / texture->getSize().y);
+    this->normalSprite = new sf::Sprite(*textures.normalTexture);
+    this->normalSprite->setScale(float(DEFINES.TILE_SIZE) / textures.normalTexture->getSize().x, float(DEFINES.TILE_SIZE) / textures.normalTexture->getSize().y);
+    this->frightenedSprite = new sf::Sprite(*textures.frightenedTexture);
+    this->frightenedSprite->setScale(this->normalSprite->getScale());
+    this->deadSprite = new sf::Sprite(*textures.deadTexture);
+    this->deadSprite->setScale(this->normalSprite->getScale());
+    this->currentSprite = this->normalSprite;
 
-    this->speed = DEFINES.GHOST_SPEED * this->sprite->getScale().x;
+    this->speed = DEFINES.GHOST_SPEED * this->normalSprite->getScale().x;
     this->moveDirection = Direction::none;
-    this->mode = GhostMode::chase;
+    this->mode = GhostMode::idle;
     this->hasMoved = false;
     this->changedTile = false;
-    this->isDead = false;
+    this->isOut = false;
+    this->dead = false;
     this->wasDead = false;
 }
 
@@ -49,7 +57,8 @@ Ghost::~Ghost()
     delete[] this->iMap;
     delete[] this->bMap;
 
-    delete this->sprite;
+    delete this->normalSprite;
+    delete this->frightenedSprite;
 }
 
 
@@ -69,18 +78,31 @@ Direction Ghost::getMoveDirection() const
     return this->moveDirection;
 }
 
+GhostMode Ghost::getMode() const
+{
+    return this->mode;
+}
+
 
 // methods
 void Ghost::move()
 {
+    // don't move if pacman hasn't moved A.K.A. game hasn't started yet
+    if(!this->map.pacman->hasMoved())
+        return;
+
     // don't move if in idle mode (waiting to join the party)
     if(this->mode == GhostMode::idle)
-        return;
-    
-    // don't move if pacman hasn't moved A.K.A. game hasn't started yet
-    if(!this->pacman.hasMoved())
-        return;
-    
+    {
+        if(this->mayLeave())
+        {
+            this->isOut = true;
+            this->mode = GhostMode::chase;
+        }
+        else
+            return;
+    }
+
     // if hasn't moved yet, find out where you are
     if(!this->hasMoved)
     {
@@ -98,16 +120,15 @@ void Ghost::move()
     // if it's possible to turn, turn
     try
     {
-        auto currentMoveTile = this->map(this->position + Directions[int(this->moveDirection)]);
-        auto plannedTurnTile = this->map(this->position + Directions[int(dir)]);
-
         if(!this->map(this->position + Directions[int(dir)]).isWall()
             && Directions[int(dir)] == -Directions[int(this->moveDirection)])
         {
             this->moveDirection = dir;
         }
         else if((!this->map(this->position + Directions[int(dir)]).isWall()
-                || this->map(this->position + Directions[int(dir)]).isGhosthouseDoor())
+                || (this->map(this->position + Directions[int(dir)]).isGhosthouseDoor()
+                    && (this->map(this->position).isGhosthouse()
+                        || this->dead)))
             && this->coords.x < currTile.getCoords().x + 2
             && this->coords.x > currTile.getCoords().x - 2
             && this->coords.y < currTile.getCoords().y + 2
@@ -206,8 +227,14 @@ void Ghost::move()
         currTile.setGhost(false);
         newCurrTile.setGhost(true);
     }
+    if(this->dead && this->position == this->respawnPosition)
+    {
+        this->mode = GhostMode::chase;
+        this->dead = false;
+        this->currentSprite = this->normalSprite;
+    }
 
-    this->sprite->setPosition(this->coords.x, this->coords.y);
+    this->currentSprite->setPosition(this->coords.x, this->coords.y);
 }
 
 bool Ghost::findTilePosition(Direction dir)
@@ -225,11 +252,7 @@ bool Ghost::findTilePosition(Direction dir)
             if(center.x > corner.x && center.x < corner.x + DEFINES.TILE_SIZE
                 && center.y > corner.y && center.y < corner.y + DEFINES.TILE_SIZE)
             {
-                if(this->map(c, r).isWall())
-                {
-                    return false;
-                }
-                else
+                if(!this->map(c, r).isWall())
                 {
                     this->position = Position(c, r);
                     this->moveDirection = dir;
@@ -241,6 +264,49 @@ bool Ghost::findTilePosition(Direction dir)
         }
     }
     return false;
+}
+
+void Ghost::changeMode(GhostMode mode)
+{
+    switch(mode)
+    {
+    case GhostMode::idle:
+        this->mode = mode;
+        this->currentSprite = this->normalSprite;
+        break;
+    case GhostMode::scatter:
+        this->mode = mode;
+        this->currentSprite = this->normalSprite;
+        break;
+    case GhostMode::chase:
+        if(this->isOut && this->mode != GhostMode::dead && this->mode != GhostMode::chase)
+        {
+            this->mode = mode;
+            this->currentSprite = this->normalSprite;
+        }
+        break;
+    case GhostMode::frightened:
+        if(this->mode != GhostMode::idle && this->mode != GhostMode::dead && this->mode != GhostMode::frightened)
+        {
+            this->mode = mode;
+            this->currentSprite = this->frightenedSprite;
+            for(int i = 1; i < int(Direction::nOfDirections); i++)
+            {
+                auto dir = Directions[i];
+                if(dir == -Directions[int(this->moveDirection)])
+                {
+                    this->moveDirection = Direction(i);
+                    break;
+                }
+            }
+        }
+        break;
+    case GhostMode::dead:
+        this->mode = mode;
+        this->currentSprite = this->deadSprite;
+        this->dead = true;
+        break;
+    }
 }
 
 bool Ghost::isAtBorder() const
@@ -387,20 +453,23 @@ Direction Ghost::chooseDirection()
         this->bMap[backPos.c][backPos.r] = 1;
     }
 
-    for(int r = 0; r < this->map.getHeight(); r++)
+    if(this->mode == GhostMode::dead)
     {
+        std::cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         for(int c = 0; c < this->map.getWidth(); c++)
         {
-            int val = this->iMap[c][r];
-            std::cerr << std::setw(3);
-            if(val == INT32_MAX)
-                std::cerr << '#';
-            else
-                std::cerr << val;
+            for(int r = 0; r < this->map.getHeight(); r++)
+            {
+                std::cerr << std::setw(3);
+                if(this->iMap[r][c] == INT32_MAX)
+                    std::cerr << '#';
+                else
+                    std::cerr << this->iMap[r][c];
+            }
+            std::cerr << std::endl;
         }
-        std::cerr << std::endl;
+        std::cerr << "<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
     }
-    std::cerr << std::endl << this->position << std::endl;
 
     for(int i = 1; i < int(Direction::nOfDirections); i++)
     {
@@ -437,29 +506,36 @@ Direction Ghost::chooseDirection()
 
 void Ghost::draw(sf::RenderWindow& window) const
 {
-    window.draw(*this->sprite);
+    window.draw(*this->currentSprite);
 }
 
 
 // Blinky
 // ctor
-Blinky::Blinky(MapData& mapData, Map& map, Pacman& pacman) : Ghost(mapData, map, pacman, CONFIG.blinkyTexture)
+Blinky::Blinky(MapData& mapData, Map& map)
+        : Ghost(mapData, map, CONFIG.blinkyTextures)
 {
     this->coords = mapData.blinky.coords;
-    this->sprite->setPosition(this->coords.x, this->coords.y);
+    this->respawnPosition = mapData.blinky.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
     this->mode = GhostMode::chase;
+    this->isOut = true;
 }
 
 // methods
 Position Blinky::getDestination() const
 {
-    return this->pacman.getPosition();
+    if(this->dead)
+        return this->respawnPosition;
+    else
+        return this->map.pacman->getPosition();
 }
 
 bool Blinky::mayLeave() const
 {
     if(this->wasDead)
-        return this->timer.getElapsedTime().asMilliseconds() > 100;
+        return this->timer.getElapsedTime().asMilliseconds() > 1000;
     else
         return true;
 }
@@ -467,27 +543,34 @@ bool Blinky::mayLeave() const
 
 // Pinky
 // ctor
-Pinky::Pinky(MapData& mapData, Map& map, Pacman& pacman) : Ghost(mapData, map, pacman, CONFIG.pinkyTexture)
+Pinky::Pinky(MapData& mapData, Map& map)
+        : Ghost(mapData, map, CONFIG.pinkyTextures)
 {
     this->coords = mapData.pinky.coords;
-    this->sprite->setPosition(this->coords.x, this->coords.y);
+    this->respawnPosition = mapData.pinky.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
 }
 
 // methods
 Position Pinky::getDestination() const
 {
-    return this->pacman.getPosition() + 4 * Directions[int(this->pacman.getFaceDirection())];
+    if(this->dead)
+        return this->respawnPosition;
+    else
+        return this->map.pacman->getPosition() + 4 * Directions[int(this->map.pacman->getFaceDirection())];
 }
 
 bool Pinky::mayLeave() const
 {
     if(this->wasDead)
     {
-        return this->timer.getElapsedTime().asMilliseconds() > 100;
+        return this->timer.getElapsedTime().asMilliseconds() > 1000;
     }
-    if(this->map.timer.getElapsedTime().asMilliseconds() >= 400)
+    if(this->timer.getElapsedTime().asMilliseconds() >= 1000)
     {
-        this->map.timer.restart();
+        this->timer.restart();
+        std::cerr << "Pinky" << std::endl;
         return true;
     }
     return false;
@@ -496,45 +579,81 @@ bool Pinky::mayLeave() const
 
 // Inky
 // ctor
-Inky::Inky(MapData& mapData, Map& map, Pacman& pacman, Blinky& blinky)
-        : Ghost(mapData, map, pacman, CONFIG.inkyTexture), blinky(blinky)
+Inky::Inky(MapData& mapData, Map& map)
+        : Ghost(mapData, map, CONFIG.inkyTextures)
 {
     this->coords = mapData.inky.coords;
-    this->sprite->setPosition(this->coords.x, this->coords.y);
+    this->respawnPosition = mapData.inky.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
 }
 
 // methods
 Position Inky::getDestination() const
 {
-    Position offsetPos = this->pacman.getPosition() + 2 * Directions[int(this->pacman.getFaceDirection())];
-    Position diff = offsetPos - this->blinky.getPosition();
-    return offsetPos + diff;
+    if(this->dead)
+        return this->respawnPosition;
+    else
+    {
+        Position offsetPos = this->map.pacman->getPosition() + 2 * Directions[int(this->map.pacman->getFaceDirection())];
+        Position diff = offsetPos - this->map.blinky->getPosition();
+        return offsetPos + diff;
+    }
 }
 
 bool Inky::mayLeave() const
 {
-    return true;
+    if(this->wasDead)
+    {
+        return this->timer.getElapsedTime().asMilliseconds() > 1000;
+    }
+    if(this->timer.getElapsedTime().asMilliseconds() >= 4000
+        && (this->map.timer.getElapsedTime().asMilliseconds() >= 4000 || this->map.dotCounter.getCount() >= 30))
+    {
+        this->map.timer.restart();
+        this->map.dotCounter.restart();
+        std::cerr << "Inky" << std::endl;
+        return true;
+    }
+    return false;
 }
 
 
 // Clyde
 // ctor
-Clyde::Clyde(MapData& mapData, Map& map, Pacman& pacman) : Ghost(mapData, map, pacman, CONFIG.clydeTexture)
+Clyde::Clyde(MapData& mapData, Map& map)
+        : Ghost(mapData, map, CONFIG.clydeTextures)
 {
     this->coords = mapData.clyde.coords;
-    this->sprite->setPosition(this->coords.x, this->coords.y);
+    this->respawnPosition = mapData.clyde.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
 }
 
 // methods
 Position Clyde::getDestination() const
 {
-    if(distance(this->position, this->pacman.getPosition()) < 8)
+    if(this->dead)
+        return this->respawnPosition;
+    if(distance(this->position, this->map.pacman->getPosition()) < 8)
         return Position(0, this->map.getHeight());
     else
-        return this->pacman.getPosition();
+        return this->map.pacman->getPosition();
 }
 
 bool Clyde::mayLeave() const
 {
-    return true;
+    if(this->wasDead)
+    {
+        return this->timer.getElapsedTime().asMilliseconds() > 1000;
+    }
+    if(this->timer.getElapsedTime().asMilliseconds() >= 4000
+        && (this->map.timer.getElapsedTime().asMilliseconds() >= 4000 || this->map.dotCounter.getCount() >= 30))
+    {
+        this->map.timer.restart();
+        this->map.dotCounter.restart();
+        std::cerr << "Clyde" << std::endl;
+        return true;
+    }
+    return false;
 }

@@ -15,10 +15,13 @@ private:
     Direction plannedTurn;
     float speed;
     int score;
+    int ghostsEaten;
     bool dead;
     bool moved;
+    bool onDrugs;
     sf::Sprite* sprite;
     Map& map;
+    sf::Clock timer;
 
 public:
     // ctor
@@ -34,6 +37,7 @@ public:
     Direction getFaceDirection() const;
     bool hasMoved() const;
     bool isDead() const;
+    bool isOnDrugs() const;
     int getScore() const;
 
     // methods

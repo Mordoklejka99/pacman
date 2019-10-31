@@ -196,14 +196,26 @@ bool loadTextures()
         CONFIG.wallTexture->loadFromFile("textures/wall.png");
         CONFIG.pacmanTexture = new sf::Texture;
         CONFIG.pacmanTexture->loadFromFile("textures/pacman.png");
-        CONFIG.blinkyTexture = new sf::Texture;
-        CONFIG.blinkyTexture->loadFromFile("textures/blinky.png");
-        CONFIG.pinkyTexture = new sf::Texture;
-        CONFIG.pinkyTexture->loadFromFile("textures/pinky.png");
-        CONFIG.inkyTexture = new sf::Texture;
-        CONFIG.inkyTexture->loadFromFile("textures/inky.png");
-        CONFIG.clydeTexture = new sf::Texture;
-        CONFIG.clydeTexture->loadFromFile("textures/clyde.png");
+
+        // blinky
+        CONFIG.blinkyTextures.normalTexture->loadFromFile("textures/blinky/normal.png");
+        CONFIG.blinkyTextures.frightenedTexture->loadFromFile("textures/blinky/frightened.png");
+        CONFIG.blinkyTextures.deadTexture->loadFromFile("textures/blinky/dead.png");
+
+        // pinky
+        CONFIG.pinkyTextures.normalTexture->loadFromFile("textures/pinky/normal.png");
+        CONFIG.pinkyTextures.frightenedTexture->loadFromFile("textures/pinky/frightened.png");
+        CONFIG.pinkyTextures.deadTexture->loadFromFile("textures/pinky/dead.png");
+
+        // inky
+        CONFIG.inkyTextures.normalTexture->loadFromFile("textures/inky/normal.png");
+        CONFIG.inkyTextures.frightenedTexture->loadFromFile("textures/inky/frightened.png");
+        CONFIG.inkyTextures.deadTexture->loadFromFile("textures/inky/dead.png");
+
+        // clyde
+        CONFIG.clydeTextures.normalTexture->loadFromFile("textures/clyde/normal.png");
+        CONFIG.clydeTextures.frightenedTexture->loadFromFile("textures/clyde/frightened.png");
+        CONFIG.clydeTextures.deadTexture->loadFromFile("textures/clyde/dead.png");
     }
     catch(std::exception e)
     {
@@ -270,12 +282,20 @@ bool loadMap(MapData& mapData)
         mapData.pacman.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pacman"]["y"].asFloat() * DEFINES.TILE_SIZE;
         mapData.blinky.coords.x = DEFINES.SIDE_MARGIN + map["blinky"]["x"].asFloat() * DEFINES.TILE_SIZE;
         mapData.blinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["blinky"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.blinky.respawn.c = map["blinky"]["respawn"]["x"].asInt();
+        mapData.blinky.respawn.r = map["blinky"]["respawn"]["y"].asInt();
         mapData.inky.coords.x = DEFINES.SIDE_MARGIN + map["inky"]["x"].asFloat() * DEFINES.TILE_SIZE;
         mapData.inky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["inky"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.pinky.respawn.c = map["pinky"]["respawn"]["x"].asInt();
+        mapData.pinky.respawn.r = map["pinky"]["respawn"]["y"].asInt();
         mapData.pinky.coords.x = DEFINES.SIDE_MARGIN + map["pinky"]["x"].asFloat() * DEFINES.TILE_SIZE;
         mapData.pinky.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["pinky"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.inky.respawn.c = map["inky"]["respawn"]["x"].asInt();
+        mapData.inky.respawn.r = map["inky"]["respawn"]["y"].asInt();
         mapData.clyde.coords.x = DEFINES.SIDE_MARGIN + map["clyde"]["x"].asFloat() * DEFINES.TILE_SIZE;
         mapData.clyde.coords.y = DEFINES.TOP_MARGIN + DEFINES.HUD_MARGIN + map["clyde"]["y"].asFloat() * DEFINES.TILE_SIZE;
+        mapData.clyde.respawn.c = map["clyde"]["respawn"]["x"].asInt();
+        mapData.clyde.respawn.r = map["clyde"]["respawn"]["y"].asInt();
     }
     catch(std::exception e)
     {
@@ -310,7 +330,7 @@ bool loadMap(MapData& mapData)
                     break;
                 case '.':
                     mapData.tiles[c][r] = new Tile(position, TileContents::dot, CONFIG.dotTexture);
-                    mapData.map[c][r] = true;
+                    mapData.map[c][r] = 1;
                     break;
                 case '*':
                     mapData.tiles[c][r] = new Tile(position, TileContents::superDot, CONFIG.superDotTexture);
@@ -326,6 +346,10 @@ bool loadMap(MapData& mapData)
                     break;
                 case 'd':
                     mapData.tiles[c][r] = new Tile(position, TileContents::ghosthouseDoor, CONFIG.wallTexture);
+                    mapData.map[c][r] = 1;
+                    break;
+                case 'g':
+                    mapData.tiles[c][r] = new Tile(position, TileContents::ghosthouse);
                     mapData.map[c][r] = 1;
                     break;
                 }

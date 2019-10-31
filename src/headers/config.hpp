@@ -46,9 +46,10 @@ enum class Direction
 enum class GhostMode
 {
     idle = 0,
-    chase,
     scatter,
-    frightened
+    chase,
+    frightened,
+    dead
 };
 
 class InvalidTilePositionException : public std::exception
@@ -110,7 +111,8 @@ enum class TileContents
     dot,
     superDot,
     wall,
-    ghosthouseDoor
+    ghosthouseDoor,
+    ghosthouse
 };
 
 struct Defines
@@ -123,6 +125,20 @@ struct Defines
     const float GHOST_SPEED = 1.7;
 };
 
+struct Textures
+{
+    sf::Texture* normalTexture;
+    sf::Texture* frightenedTexture;
+    sf::Texture* deadTexture;
+
+    Textures()
+    {
+        this->normalTexture = new sf::Texture;
+        this->frightenedTexture = new sf::Texture;
+        this->deadTexture = new sf::Texture;
+    }
+};
+
 struct Config
 {
     Resolution resolution;
@@ -131,10 +147,10 @@ struct Config
     sf::Texture* superDotTexture;
     sf::Texture* wallTexture;
     sf::Texture* pacmanTexture;
-    sf::Texture* blinkyTexture;
-    sf::Texture* pinkyTexture;
-    sf::Texture* inkyTexture;
-    sf::Texture* clydeTexture;
+    Textures blinkyTextures;
+    Textures inkyTextures;
+    Textures pinkyTextures;
+    Textures clydeTextures;
 };
 
 struct MapData
@@ -148,18 +164,22 @@ struct MapData
     struct
     {
         Coords coords;
+        Position respawn;
     } inky;
     struct
     {
         Coords coords;
+        Position respawn;
     } blinky;
     struct
     {
         Coords coords;
+        Position respawn;
     } pinky;
     struct
     {
         Coords coords;
+        Position respawn;
     } clyde;
     Tile*** tiles;
     int dotCount;

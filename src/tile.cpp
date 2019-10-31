@@ -7,6 +7,7 @@
 // project headers
 #include "headers/tile.hpp"
 #include "headers/config.hpp"
+#include "headers/ghost.hpp"
 
 
 // ctors
@@ -98,6 +99,11 @@ bool Tile::isWall()
 bool Tile::isGhosthouseDoor()
 {
     return this->content == TileContents::ghosthouseDoor;
+}
+
+bool Tile::isGhosthouse()
+{
+    return this->content == TileContents::ghosthouse;
 }
 
 bool Tile::isTunel()

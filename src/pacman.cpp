@@ -1,5 +1,6 @@
 // standard c++ lib
 #include <iostream>
+#include <vector>
 
 // additional libs
 #include <SFML/Graphics.hpp>
@@ -9,6 +10,7 @@
 #include "headers/config.hpp"
 #include "headers/map.hpp"
 #include "headers/tile.hpp"
+#include "headers/ghost.hpp"
 
 
 // ctor
@@ -67,6 +69,11 @@ bool Pacman::isDead() const
     return this->dead;
 }
 
+bool Pacman::isOnDrugs() const
+{
+    return this->onDrugs;
+}
+
 int Pacman::getScore() const
 {
     return this->score;
@@ -87,6 +94,7 @@ void Pacman::turn(Direction dir)
         {
             this->faceDirection = this->moveDirection = this->plannedTurn = dir;
             this->moved = true;
+            this->map.timer.restart();
         }
     }
 }
@@ -96,6 +104,15 @@ void Pacman::move()
     // if first move has not been done, stand by
     if(!this->moved)
         return;
+
+    if(this->onDrugs && this->timer.getElapsedTime().asMilliseconds() >= 7000)
+    {
+        this->onDrugs = false;
+        this->map.blinky->changeMode(GhostMode::chase);
+        this->map.pinky->changeMode(GhostMode::chase);
+        this->map.inky->changeMode(GhostMode::chase);
+        this->map.clyde->changeMode(GhostMode::chase);
+    }
 
     // to shorten conditions at least a bit
     Tile& currTile = this->map(this->position);
@@ -186,12 +203,21 @@ void Pacman::move()
         this->score += 10;
         this->map--;
         this->map.timer.restart();
+        this->map.dotCounter++;
     }
     else if(newCurrTile.containsSuperDot())
     {
         this->score += 50;
         this->map--;
         this->map.timer.restart();
+        this->map.dotCounter++;
+        this->timer.restart();
+        this->onDrugs = true;
+        this->ghostsEaten = 0;
+        this->map.blinky->changeMode(GhostMode::frightened);
+        this->map.pinky->changeMode(GhostMode::frightened);
+        this->map.inky->changeMode(GhostMode::frightened);
+        this->map.clyde->changeMode(GhostMode::frightened);
     }
     if(&currTile != &newCurrTile)
     {
@@ -200,7 +226,20 @@ void Pacman::move()
     }
     if(newCurrTile.containsGhost())
     {
-        this->dead = true;
+        std::vector<Ghost*> ghosts = this->map.ghostsInTile(this->position);
+        for(Ghost* ghost : ghosts)
+        {
+            GhostMode mode = ghost->getMode();
+            if(mode == GhostMode::dead)
+                continue;
+            if(mode == GhostMode::frightened)
+            {
+                this->score += (++this->ghostsEaten) * 400;
+                ghost->changeMode(GhostMode::dead);
+                continue;
+            }
+            this->dead = true;
+        }
     }
 
     this->sprite->setPosition(this->coords.x, this->coords.y);

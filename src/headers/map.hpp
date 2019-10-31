@@ -6,6 +6,12 @@
 #include "config.hpp"
 
 class Tile;
+class Pacman;
+class Ghost;
+class Blinky;
+class Pinky;
+class Inky;
+class Clyde;
 
 class DotCounter
 {
@@ -21,6 +27,10 @@ public:
     {
         this->dotCount = 0;
     }
+    void operator++(int)
+    {
+        this->dotCount++;
+    }
 };
 
 class Map
@@ -28,6 +38,11 @@ class Map
 public:
     sf::Clock timer;
     DotCounter dotCounter;
+    Pacman* pacman;
+    Blinky* blinky;
+    Pinky* pinky;
+    Inky* inky;
+    Clyde* clyde;
 
 private:
     int width;
@@ -61,10 +76,9 @@ public:
 
     // methods
     bool offTheMap(Position position) const;
-    bool pinkyIsOut() const;
-    bool inkyIsOut() const;
-    bool clydeIsOut() const;
-    void draw(sf::RenderWindow& window);
+    std::vector<Ghost*> ghostsInTile(Position position);
+    void move();
+    void draw(sf::RenderWindow& window) const;
 };
 
 #endif

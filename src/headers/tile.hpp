@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include "config.hpp"
 
+class Ghost;
+
 class Tile
 {
 private:
@@ -35,6 +37,7 @@ public:
     // methods
     bool isWall();
     bool isGhosthouseDoor();
+    bool isGhosthouse();
     bool isTunel();
     bool containsDot();
     bool containsSuperDot();

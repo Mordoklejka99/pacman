@@ -13,24 +13,28 @@ class Ghost
 protected:
     Coords coords;
     Position position;
+    Position respawnPosition;
     Direction moveDirection;
     Direction plannedTurn;
     GhostMode mode;
     float speed;
     bool hasMoved;
     bool changedTile;
-    bool isDead;
+    bool isOut;
+    bool dead;
     bool wasDead;
-    sf::Sprite* sprite;
+    sf::Sprite* normalSprite;
+    sf::Sprite* frightenedSprite;
+    sf::Sprite* deadSprite;
+    sf::Sprite* currentSprite;
     Map& map;
-    Pacman& pacman;
     int** bMap;
     int** iMap;
-    sf::Clock timer;
+    static sf::Clock timer;
 
 public:
     // ctor
-    Ghost(MapData& mapData, Map& map, Pacman& pacman, sf::Texture* texture);
+    Ghost(MapData& mapData, Map& map, Textures textures);
 
     // dtor
     ~Ghost();
@@ -39,9 +43,11 @@ public:
     Coords getCoords() const;
     Position getPosition() const;
     Direction getMoveDirection() const;
+    GhostMode getMode() const;
 
     // methods
     void move();
+    void changeMode(GhostMode mode);
     void draw(sf::RenderWindow& window) const;
 
 protected:
@@ -61,7 +67,7 @@ class Blinky : public Ghost
 {
 public:
     // ctor
-    Blinky(MapData& mapData, Map& map, Pacman& pacman);
+    Blinky(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;
@@ -73,7 +79,7 @@ class Pinky : public Ghost
 {
 public:
     // ctor
-    Pinky(MapData& mapData, Map& map, Pacman& pacman);
+    Pinky(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;
@@ -83,11 +89,9 @@ private:
 
 class Inky : public Ghost
 {
-private:
-    Blinky& blinky;
 public:
     // ctor
-    Inky(MapData& mapData, Map& map, Pacman& pacman, Blinky& blinky);
+    Inky(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;
@@ -99,7 +103,7 @@ class Clyde : public Ghost
 {
 public:
     // ctor
-    Clyde(MapData& mapData, Map& map, Pacman& pacman);
+    Clyde(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;

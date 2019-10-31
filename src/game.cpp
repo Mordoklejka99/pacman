@@ -29,10 +29,16 @@ int game()
 
     Map map(mapData);
     Pacman pacman(mapData, map);
-    Blinky blinky(mapData, map, pacman);
-    Pinky pinky(mapData, map, pacman);
-    Inky inky(mapData, map, pacman, blinky);
-    Clyde clyde(mapData, map, pacman);
+    Blinky blinky(mapData, map);
+    Pinky pinky(mapData, map);
+    Inky inky(mapData, map);
+    Clyde clyde(mapData, map);
+
+    map.pacman = &pacman;
+    map.blinky = &blinky;
+    map.pinky = &pinky;
+    map.inky = &inky;
+    map.clyde = &clyde;
 
     
     sf::Clock clock;
@@ -50,18 +56,8 @@ int game()
         handleGameEvents(window, pacman);
         window.clear();
 
-        pacman.move();
-        blinky.move();
-        // pinky.move();
-        // inky.move();
-        // clyde.move();
-
+        map.move();
         map.draw(window);
-        pacman.draw(window);
-        blinky.draw(window);
-        pinky.draw(window);
-        inky.draw(window);
-        clyde.draw(window);
 
         if(pacman.isDead())
         {
