@@ -15,7 +15,7 @@ private:
     Direction plannedTurn;
     float speed;
     int score;
-    int ghostsEaten;
+    int ghostsEatenMultiplier;
     bool dead;
     bool moved;
     bool onDrugs;

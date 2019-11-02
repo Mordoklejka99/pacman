@@ -67,7 +67,6 @@ public:
     int getWidth();
     int getHeight();
     int getDotCount();
-    int getTotalDotCount();
 
     // operators
     Tile& operator()(int row, int col);

@@ -118,6 +118,7 @@ void Ghost::move()
     // to shorten conditions at least a bit
     Tile& currTile = this->map(this->position);
     Direction dir = this->plannedTurn = this->chooseDirection();
+
     // if it's possible to turn, turn
     try
     {
@@ -149,7 +150,16 @@ void Ghost::move()
     }
     catch(InvalidTilePositionException)
     {
-        //
+        if(currTile.isTunel()
+            && this->coords.x < currTile.getCoords().x + 2
+            && this->coords.x > currTile.getCoords().x - 2
+            && this->coords.y < currTile.getCoords().y + 2
+            && this->coords.y > currTile.getCoords().y - 2
+            && dir != this->moveDirection)
+        {
+            this->coords = currTile.getCoords();
+            this->moveDirection = dir;
+        }
     }
 
     dir = this->moveDirection;
@@ -158,6 +168,24 @@ void Ghost::move()
     // if there's a tunel, go through it
     if(this->isAtBorder() && currTile.isTunel())
     {
+        // still don't go through the wall, though
+        try
+        {
+            if(this->map(this->position + sf::Vector2f(Directions[int(dir)])).isWall()
+                && this->coords.x + Directions[int(dir)].x * this->speed < currTile.getCoords().x + 2
+                && this->coords.x + Directions[int(dir)].x * this->speed > currTile.getCoords().x - 2
+                && this->coords.y + Directions[int(dir)].y * this->speed < currTile.getCoords().y + 2
+                && this->coords.y + Directions[int(dir)].y * this->speed > currTile.getCoords().y - 2)
+            {
+                this->coords = currTile.getCoords();
+                dir = this->moveDirection = Direction::none;
+            }
+        }
+        catch(InvalidTilePositionException)
+        {
+            //
+        }
+        
         // change coords
         this->coords += Directions[int(dir)] * this->speed;
 
@@ -457,7 +485,6 @@ Direction Ghost::chooseDirection()
         while(true)
         {
             int dir = rand() % (int(Direction::nOfDirections) - 1) + 1;
-            std::cerr << dir << std::endl;
             try
             {
                 if(Directions[dir] == -Directions[int(this->moveDirection)]

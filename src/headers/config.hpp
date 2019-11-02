@@ -131,12 +131,7 @@ struct Textures
     sf::Texture* frightenedTexture;
     sf::Texture* deadTexture;
 
-    Textures()
-    {
-        this->normalTexture = new sf::Texture;
-        this->frightenedTexture = new sf::Texture;
-        this->deadTexture = new sf::Texture;
-    }
+    Textures();
 };
 
 struct Config
@@ -146,6 +141,7 @@ struct Config
     sf::Texture* dotTexture;
     sf::Texture* superDotTexture;
     sf::Texture* wallTexture;
+    sf::Texture* ghosthouseDoorTexture;
     sf::Texture* pacmanTexture;
     Textures blinkyTextures;
     Textures inkyTextures;

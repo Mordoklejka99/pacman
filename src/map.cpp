@@ -57,11 +57,6 @@ int Map::getDotCount()
     return this->dotCount;
 }
 
-int Map::getTotalDotCount()
-{
-    return this->nOfDots;
-}
-
 // operators
 Tile& Map::operator()(int col, int row)
 {

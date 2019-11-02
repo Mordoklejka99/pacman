@@ -61,9 +61,21 @@ int game()
 
         if(pacman.isDead())
         {
-            std::cerr << "GAME OVER" << std::endl;
+            std::cerr << "GAME OVER, YOU DIED!" << std::endl;
             while(window.isOpen())
+            {
                 handleGameEvents(window, pacman);
+                window.display();
+            }
+        }
+        if(map.getDotCount() == 0)
+        {
+            std::cerr << "GAME OVER, YOU WON!" << std::endl;
+            while(window.isOpen())
+            {
+                handleGameEvents(window, pacman);
+                window.display();
+            }
         }
 
         window.display();

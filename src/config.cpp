@@ -156,6 +156,16 @@ std::ostream& operator<<(std::ostream& out, Position rval)
 }
 
 
+// Textures
+// ctor
+Textures::Textures()
+{
+    this->normalTexture = new sf::Texture;
+    this->frightenedTexture = new sf::Texture;
+    this->deadTexture = new sf::Texture;
+}
+
+
 int distance(Position lhv, Position rhv)
 {
     return int(sqrt((lhv.c - rhv.c) * (lhv.c - rhv.c) - (lhv.r - rhv.r) * (lhv.r - rhv.r)));
@@ -194,6 +204,8 @@ bool loadTextures()
         CONFIG.superDotTexture->loadFromFile("textures/superdot.png");
         CONFIG.wallTexture = new sf::Texture;
         CONFIG.wallTexture->loadFromFile("textures/wall.png");
+        CONFIG.ghosthouseDoorTexture = new sf::Texture;
+        CONFIG.ghosthouseDoorTexture->loadFromFile("textures/door.png");
         CONFIG.pacmanTexture = new sf::Texture;
         CONFIG.pacmanTexture->loadFromFile("textures/pacman.png");
 
@@ -331,10 +343,12 @@ bool loadMap(MapData& mapData)
                 case '.':
                     mapData.tiles[c][r] = new Tile(position, TileContents::dot, CONFIG.dotTexture);
                     mapData.map[c][r] = 1;
+                    mapData.dotCount++;
                     break;
                 case '*':
                     mapData.tiles[c][r] = new Tile(position, TileContents::superDot, CONFIG.superDotTexture);
                     mapData.map[c][r] = 1;
+                    mapData.dotCount++;
                     break;
                 case '#':
                     mapData.tiles[c][r] = new Tile(position, TileContents::wall, CONFIG.wallTexture);
@@ -345,7 +359,7 @@ bool loadMap(MapData& mapData)
                     mapData.map[c][r] = 0;
                     break;
                 case 'd':
-                    mapData.tiles[c][r] = new Tile(position, TileContents::ghosthouseDoor, CONFIG.wallTexture);
+                    mapData.tiles[c][r] = new Tile(position, TileContents::ghosthouseDoor, CONFIG.ghosthouseDoorTexture);
                     mapData.map[c][r] = 1;
                     break;
                 case 'g':

@@ -7,51 +7,117 @@
     },
     "blinky" : {
         "x" : 13.5,
-        "y" : 8
+        "y" : 8,
+        "respawn" : {
+            "x" : 17,
+            "y" : 10
+        }
     },
     "inky" : {
-        "x" : 11.5,
-        "y" : 10.5
+        "x" : 17,
+        "y" : 13,
+        "respawn" : {
+            "x" : 17,
+            "y" : 13
+        }
     },
     "pinky" : {
-        "x" : 13.5,
-        "y" : 10.5
+        "x" : 10,
+        "y" : 10,
+        "respawn" : {
+            "x" : 10,
+            "y" : 10
+        }
     },
     "clyde" : {
-        "x" : 15.5,
-        "y" : 10.5
+        "x" : 10,
+        "y" : 13,
+        "respawn" : {
+            "x" : 10,
+            "y" : 13
+        }
     },
     "map" : [
         "#t#ooooooooo#tt#ooooooooo#t#",
-        "# #ooooooooo#  #ooooooooo# #",
-        "# #ooooooooo#  #ooooooooo# #",
-        "# #ooooooooo#  #ooooooooo# #",
-        "# ###########  ########### #",
-        "# ##*#................#*## #",
-        "# ##.#.##############.#.## #",
-        "# ##.#.#...######...#.#.## #",
+        "#t#ooooooooo#tt#ooooooooo#t#",
+        "#t#ooooooooo#tt#ooooooooo#t#",
+        "#t#ooooooooo#tt#ooooooooo#t#",
+        "#t###########tt###########t#",
+        "#t##*..................*##t#",
+        "#t##.##################.##t#",
+        "#t##.###...######...###.##t#",
         "#   .....#........#.....   #",
         "####.### ########## ###.####",     //10
-        "ooo#.### #        # ###.#ooo",
-        "ooo#.### #        # ###.#ooo",
-        "ooo#.### #        # ###.#ooo",
-        "####.### #        # ###.####",
-        "t        ##dd##dd##        t",
+        "ooo#.### #gggggggg# ###.#ooo",
+        "ooo#.### #gggggggg# ###.#ooo",
+        "ooo#.### #gggggggg# ###.#ooo",
+        "####.### #gggggggg# ###.####",
+        "tttt     ###d##d###     tttt",
         "########     ##     ########",
         "ooooooo#####....#####ooooooo",
         "ooooooo#.....##.....#ooooooo",
         "o#######.##########.#######o",
         "o#.*.....##########.....*.#o",     //20
         "o#.#####.##########.#####.#o",
-        "o#.#####.*........*.#####.#o",
+        "o#.#####............#####.#o",
         "o#.#####.##.####.##.#####.#o",
         "o#.#####.##.####.##.#####.#o",
         "o#.#####.##.####.##.#####.#o",
         "o#.......##.####.##.......#o",
         "##### ##.##.####.##.## #####",
         "#     ##............##     #",
-        "# ###########  ########### #",
-        "# #ooooooooo#  #ooooooooo# #",    //30
+        "#t###########tt###########t#",
+        "#t#ooooooooo#tt#ooooooooo#t#",    //30
         "#t#ooooooooo#tt#ooooooooo#t#"
+    ],
+    "levels" : [
+        {
+            "lastLevel" : 1,
+            "pacmanSpeed" : {
+                "normal" : 0.8,
+                "onDrugs" : 0.9
+            },
+            "ghostSpeed" : {
+                "normal" : 0.75,
+                "frightened" : 0.5,
+                "inTunel" : 0.4
+            }
+        },
+        {
+            "lastLevel" : 4,
+            "pacmanSpeed" : {
+                "normal" : 0.9,
+                "onDrugs" : 0.95
+            },
+            "ghostSpeed" : {
+                "normal" : 0.75,
+                "frightened" : 0.55,
+                "inTunel" : 0.45
+            }
+        },
+        {
+            "lastLevel" : 20,
+            "pacmanSpeed" : {
+                "normal" : 1,
+                "onDrugs" : 1
+            },
+            "ghostSpeed" : {
+                "normal" : 0.95,
+                "frightened" : 0.6,
+                "inTunel" : 0.5
+            }
+        },
+        {
+            "lastLevel" : 2147483647,
+            "pacmanSpeed" : {
+                "normal" : 0.9,
+                "onDrugs" : 0.9
+            },
+            "ghostSpeed" : {
+                "normal" : 0.95,
+                "frightened" : 0.6,
+                "inTunel" : 0.5
+            }
+        }
     ]
 }

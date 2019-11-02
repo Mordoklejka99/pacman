@@ -52,7 +52,7 @@
         "ooooo#.##          ##.#ooooo",
         "ooooo#.## ###dd### ##.#ooooo",
         "######.## #gggggg# ##.######",
-        "t     .   #gggggg#   .     t",
+        "tttttt.   #gggggg#   .tttttt",
         "######.## #gggggg# ##.######",
         "ooooo#.## ######## ##.#ooooo",
         "ooooo#.##          ##.#ooooo",
@@ -73,13 +73,51 @@
     "levels" : [
         {
             "lastLevel" : 1,
-            "pacmanSpeed" : 0.80,
-            "ghostSpeed" : 0.75
+            "pacmanSpeed" : {
+                "normal" : 0.8,
+                "onDrugs" : 0.9
+            },
+            "ghostSpeed" : {
+                "normal" : 0.75,
+                "frightened" : 0.5,
+                "inTunel" : 0.4
+            }
         },
         {
             "lastLevel" : 4,
-            "pacmanSpeed" : 0.90,
-            "ghostSpeed" : 0.85
+            "pacmanSpeed" : {
+                "normal" : 0.9,
+                "onDrugs" : 0.95
+            },
+            "ghostSpeed" : {
+                "normal" : 0.75,
+                "frightened" : 0.55,
+                "inTunel" : 0.45
+            }
+        },
+        {
+            "lastLevel" : 20,
+            "pacmanSpeed" : {
+                "normal" : 1,
+                "onDrugs" : 1
+            },
+            "ghostSpeed" : {
+                "normal" : 0.95,
+                "frightened" : 0.6,
+                "inTunel" : 0.5
+            }
+        },
+        {
+            "lastLevel" : 2147483647,
+            "pacmanSpeed" : {
+                "normal" : 0.9,
+                "onDrugs" : 0.9
+            },
+            "ghostSpeed" : {
+                "normal" : 0.95,
+                "frightened" : 0.6,
+                "inTunel" : 0.5
+            }
         }
     ]
 }

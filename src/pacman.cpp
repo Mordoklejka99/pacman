@@ -137,9 +137,18 @@ void Pacman::move()
             this->faceDirection = this->moveDirection = dir;
         }
     }
-    catch(...)
+    catch(InvalidTilePositionException)
     {
-        //
+        if(currTile.isTunel()
+            && this->coords.x < currTile.getCoords().x + 2
+            && this->coords.x > currTile.getCoords().x - 2
+            && this->coords.y < currTile.getCoords().y + 2
+            && this->coords.y > currTile.getCoords().y - 2
+            && dir != this->moveDirection)
+        {
+            this->coords = currTile.getCoords();
+            this->faceDirection = this->moveDirection = dir;
+        }
     }
 
     dir = this->moveDirection;
@@ -148,6 +157,24 @@ void Pacman::move()
     // if there's a tunel, go through it
     if(this->isAtBorder() && currTile.isTunel())
     {
+        // still don't go through the wall, though
+        try
+        {
+            if(this->map(this->position + sf::Vector2f(Directions[int(dir)])).isWall()
+                && this->coords.x + Directions[int(dir)].x * this->speed < currTile.getCoords().x + 2
+                && this->coords.x + Directions[int(dir)].x * this->speed > currTile.getCoords().x - 2
+                && this->coords.y + Directions[int(dir)].y * this->speed < currTile.getCoords().y + 2
+                && this->coords.y + Directions[int(dir)].y * this->speed > currTile.getCoords().y - 2)
+            {
+                this->coords = currTile.getCoords();
+                dir = this->moveDirection = Direction::none;
+            }
+        }
+        catch(InvalidTilePositionException)
+        {
+            //
+        }
+        
         // change coords
         this->coords += Directions[int(dir)] * this->speed;
 
@@ -213,7 +240,7 @@ void Pacman::move()
         this->map.dotCounter++;
         this->timer.restart();
         this->onDrugs = true;
-        this->ghostsEaten = 0;
+        this->ghostsEatenMultiplier = 0;
         this->map.blinky->changeMode(GhostMode::frightened);
         this->map.pinky->changeMode(GhostMode::frightened);
         this->map.inky->changeMode(GhostMode::frightened);
@@ -234,7 +261,8 @@ void Pacman::move()
                 continue;
             if(mode == GhostMode::frightened)
             {
-                this->score += (++this->ghostsEaten) * 400;
+                this->ghostsEatenMultiplier = (this->ghostsEatenMultiplier == 0 ? 1 : 2 * this->ghostsEatenMultiplier);
+                this->score += (this->ghostsEatenMultiplier) * 200;
                 ghost->changeMode(GhostMode::dead);
                 continue;
             }
