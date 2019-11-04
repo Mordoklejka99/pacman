@@ -246,11 +246,10 @@ void Pacman::move()
         this->map.inky->changeMode(GhostMode::frightened);
         this->map.clyde->changeMode(GhostMode::frightened);
     }
-    if(&currTile != &newCurrTile)
-    {
-        currTile.setPacman(false);
-        newCurrTile.setPacman(true);
-    }
+
+    currTile.setPacman(false);
+    newCurrTile.setPacman(true);
+    
     if(newCurrTile.containsGhost())
     {
         std::vector<Ghost*> ghosts = this->map.ghostsInTile(this->position);
