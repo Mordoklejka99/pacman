@@ -13,7 +13,6 @@ private:
     Direction moveDirection;
     Direction faceDirection;
     Direction plannedTurn;
-    float speed;
     int score;
     int ghostsEatenMultiplier;
     bool dead;

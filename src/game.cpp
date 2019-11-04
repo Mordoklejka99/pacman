@@ -22,7 +22,7 @@ int game()
     sf::RenderWindow window(sf::VideoMode(CONFIG.resolution.width, CONFIG.resolution.height), "PacMan");
 
     MapData mapData;
-    if(!loadMap(mapData))
+    if(!loadMap(mapData) || !loadLevel(mapData, 1))
     {
         throw "Error lol";
     }

@@ -378,3 +378,49 @@ bool loadMap(MapData& mapData)
 
     return true;
 }
+
+bool loadLevel(MapData& mapData, int level)
+{
+    std::ifstream configFile("config.cfg");
+    if(!configFile.is_open())
+    {
+        std::cerr << "Config file not available." << std::endl;
+        return false;
+    }
+    Json::Value config;
+    configFile >> config;
+
+    std::string mapName;
+
+    try
+    {
+        mapName = config["map"].asString();
+    }
+    catch(std::exception e)
+    {
+        std::cerr << "An error occurred during config loading in function loadMap(). Config file corrupted or not existing." << std::endl;
+        return false;
+    }
+
+    configFile.close();
+
+    std::ifstream mapFile("maps/" + mapName + ".pmmap");
+    Json::Value map;
+    mapFile >> map;
+
+    try
+    {
+        DEFINES.PACMAN_SPEED.NORMAL = DEFINES.BASE_SPEED * map["levels"][level - 1]["pacmanSpeed"]["normal"].asFloat();
+        DEFINES.PACMAN_SPEED.ON_DRUGS = DEFINES.BASE_SPEED * map["levels"][level - 1]["pacmanSpeed"]["onDrugs"].asFloat();
+        
+        DEFINES.GHOST_SPEED.NORMAL = DEFINES.BASE_SPEED * map["levels"][level - 1]["ghostSpeed"]["normal"].asFloat();
+        DEFINES.GHOST_SPEED.FRIGHTENED = DEFINES.BASE_SPEED * map["levels"][level - 1]["ghostSpeed"]["frightened"].asFloat();
+        DEFINES.GHOST_SPEED.IN_TUNEL = DEFINES.BASE_SPEED * map["levels"][level - 1]["ghostSpeed"]["inTunel"].asFloat();
+    }
+    catch(...)
+    {
+        std::cerr << "An error occurred during level loading in function loadLevel(). Map file corrupted or not existing." << std::endl;
+    }
+
+    return true;
+}

@@ -23,7 +23,6 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
     this->sprite->setScale(float(DEFINES.TILE_SIZE) / CONFIG.pacmanTexture->getSize().x, float(DEFINES.TILE_SIZE) / CONFIG.pacmanTexture->getSize().y);
     this->sprite->setPosition(this->coords.x, this->coords.y);
 
-    this->speed = DEFINES.PACMAN_SPEED * this->sprite->getScale().x;
     this->faceDirection = this->moveDirection = Direction::none;
     this->moved = false;
     this->dead = false;
@@ -152,6 +151,12 @@ void Pacman::move()
     }
 
     dir = this->moveDirection;
+    float speed;
+
+    if(this->onDrugs)
+        speed = DEFINES.PACMAN_SPEED.ON_DRUGS * this->sprite->getScale().x;
+    else
+        speed = DEFINES.PACMAN_SPEED.NORMAL * this->sprite->getScale().x;
 
     // move
     // if there's a tunel, go through it
@@ -161,10 +166,10 @@ void Pacman::move()
         try
         {
             if(this->map(this->position + sf::Vector2f(Directions[int(dir)])).isWall()
-                && this->coords.x + Directions[int(dir)].x * this->speed < currTile.getCoords().x + 2
-                && this->coords.x + Directions[int(dir)].x * this->speed > currTile.getCoords().x - 2
-                && this->coords.y + Directions[int(dir)].y * this->speed < currTile.getCoords().y + 2
-                && this->coords.y + Directions[int(dir)].y * this->speed > currTile.getCoords().y - 2)
+                && this->coords.x + Directions[int(dir)].x * speed < currTile.getCoords().x + 2
+                && this->coords.x + Directions[int(dir)].x * speed > currTile.getCoords().x - 2
+                && this->coords.y + Directions[int(dir)].y * speed < currTile.getCoords().y + 2
+                && this->coords.y + Directions[int(dir)].y * speed > currTile.getCoords().y - 2)
             {
                 this->coords = currTile.getCoords();
                 dir = this->moveDirection = Direction::none;
@@ -176,7 +181,7 @@ void Pacman::move()
         }
         
         // change coords
-        this->coords += Directions[int(dir)] * this->speed;
+        this->coords += Directions[int(dir)] * speed;
 
         // if center of pacman has passed tile (and map) edge, teleport it to the other side
         Coords center(this->coords + Coords(DEFINES.TILE_SIZE / 2));
@@ -201,10 +206,10 @@ void Pacman::move()
     }
     // if about to hit the wall, STOP
     else if(this->map(this->position + sf::Vector2f(Directions[int(dir)])).isWall()
-        && this->coords.x + Directions[int(dir)].x * this->speed < currTile.getCoords().x + 2
-        && this->coords.x + Directions[int(dir)].x * this->speed > currTile.getCoords().x - 2
-        && this->coords.y + Directions[int(dir)].y * this->speed < currTile.getCoords().y + 2
-        && this->coords.y + Directions[int(dir)].y * this->speed > currTile.getCoords().y - 2)
+        && this->coords.x + Directions[int(dir)].x * speed < currTile.getCoords().x + 2
+        && this->coords.x + Directions[int(dir)].x * speed > currTile.getCoords().x - 2
+        && this->coords.y + Directions[int(dir)].y * speed < currTile.getCoords().y + 2
+        && this->coords.y + Directions[int(dir)].y * speed > currTile.getCoords().y - 2)
     {
         this->coords = currTile.getCoords();
         this->moveDirection = Direction::none;
@@ -212,7 +217,7 @@ void Pacman::move()
     // otherwise, go ahead
     else
     {
-        this->coords += Directions[int(dir)] * this->speed;
+        this->coords += Directions[int(dir)] * speed;
         if(this->coords.x + DEFINES.TILE_SIZE / 2 < currTile.getCoords().x
             || this->coords.x + DEFINES.TILE_SIZE / 2 > currTile.getCoords().x + DEFINES.TILE_SIZE
             || this->coords.y + DEFINES.TILE_SIZE / 2 < currTile.getCoords().y

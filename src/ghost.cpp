@@ -34,9 +34,9 @@ Ghost::Ghost(MapData& mapData, Map& map, Textures textures) : map(map)
     this->frightenedSprite->setScale(this->normalSprite->getScale());
     this->deadSprite = new sf::Sprite(*textures.deadTexture);
     this->deadSprite->setScale(this->normalSprite->getScale());
+
     this->currentSprite = this->normalSprite;
 
-    this->speed = DEFINES.GHOST_SPEED * this->normalSprite->getScale().x;
     this->moveDirection = Direction::none;
     this->mode = GhostMode::idle;
     this->hasMoved = false;
@@ -91,7 +91,7 @@ void Ghost::move()
     // don't move if pacman hasn't moved A.K.A. game hasn't started yet
     if(!this->map.pacman->hasMoved())
         return;
-
+        
     // don't move if in idle mode (waiting to join the party)
     if(this->mode == GhostMode::idle)
     {
@@ -126,6 +126,7 @@ void Ghost::move()
             && Directions[int(dir)] == -Directions[int(this->moveDirection)])
         {
             this->moveDirection = dir;
+            this->changedTile = false;
         }
         else if((!this->map(this->position + Directions[int(dir)]).isWall()
                 || (this->map(this->position + Directions[int(dir)]).isGhosthouseDoor()
@@ -139,6 +140,7 @@ void Ghost::move()
         {
             this->coords = currTile.getCoords();
             this->moveDirection = dir;
+            this->changedTile = false;
         }
         else if(this->map(this->position + Directions[int(this->moveDirection)]).isWall()
             && !this->map(this->position + Directions[int(this->moveDirection)]).isGhosthouseDoor()
@@ -146,6 +148,7 @@ void Ghost::move()
                 || this->map(this->position + Directions[int(dir)]).isGhosthouseDoor()))
         {
             this->moveDirection = dir;
+            this->changedTile = false;
         }
     }
     catch(InvalidTilePositionException)
@@ -163,6 +166,14 @@ void Ghost::move()
     }
 
     dir = this->moveDirection;
+    float speed;
+
+    if(this->mode == GhostMode::frightened)
+        speed = DEFINES.GHOST_SPEED.FRIGHTENED * this->currentSprite->getScale().x;
+    else if(currTile.isTunel() && this->mode != GhostMode::dead)
+        speed = DEFINES.GHOST_SPEED.IN_TUNEL * this->currentSprite->getScale().x;
+    else
+        speed = DEFINES.GHOST_SPEED.NORMAL * this->currentSprite->getScale().x;
 
     // move
     // if there's a tunel, go through it
@@ -172,10 +183,10 @@ void Ghost::move()
         try
         {
             if(this->map(this->position + sf::Vector2f(Directions[int(dir)])).isWall()
-                && this->coords.x + Directions[int(dir)].x * this->speed < currTile.getCoords().x + 2
-                && this->coords.x + Directions[int(dir)].x * this->speed > currTile.getCoords().x - 2
-                && this->coords.y + Directions[int(dir)].y * this->speed < currTile.getCoords().y + 2
-                && this->coords.y + Directions[int(dir)].y * this->speed > currTile.getCoords().y - 2)
+                && this->coords.x + Directions[int(dir)].x * speed < currTile.getCoords().x + 2
+                && this->coords.x + Directions[int(dir)].x * speed > currTile.getCoords().x - 2
+                && this->coords.y + Directions[int(dir)].y * speed < currTile.getCoords().y + 2
+                && this->coords.y + Directions[int(dir)].y * speed > currTile.getCoords().y - 2)
             {
                 this->coords = currTile.getCoords();
                 dir = this->moveDirection = Direction::none;
@@ -187,7 +198,7 @@ void Ghost::move()
         }
         
         // change coords
-        this->coords += Directions[int(dir)] * this->speed;
+        this->coords += Directions[int(dir)] * speed;
 
         // if center of ghost has passed tile (and map) edge, teleport it to the other side
         Coords center(this->coords + Coords(DEFINES.TILE_SIZE / 2));
@@ -213,9 +224,9 @@ void Ghost::move()
         }
     }
     //if about to EXIT ghosthouse, go for it
-    else if(this->map(this->position + Directions[int(dir)]).isGhosthouseDoor() && this->mayLeave())
+    else if(this->map(this->position + Directions[int(dir)]).isGhosthouseDoor() && this->isOut)
     {
-        this->coords += Directions[int(dir)] * this->speed;
+        this->coords += Directions[int(dir)] * speed;
         if(this->coords.x + DEFINES.TILE_SIZE / 2 < currTile.getCoords().x
             || this->coords.x + DEFINES.TILE_SIZE / 2 > currTile.getCoords().x + DEFINES.TILE_SIZE
             || this->coords.y + DEFINES.TILE_SIZE / 2 < currTile.getCoords().y
@@ -227,17 +238,17 @@ void Ghost::move()
     }
     // if about to hit the wall, STOP
     else if(this->map(this->position + sf::Vector2f(Directions[int(dir)])).isWall()
-        && this->coords.x + Directions[int(dir)].x * this->speed < currTile.getCoords().x + 2
-        && this->coords.x + Directions[int(dir)].x * this->speed > currTile.getCoords().x - 2
-        && this->coords.y + Directions[int(dir)].y * this->speed < currTile.getCoords().y + 2
-        && this->coords.y + Directions[int(dir)].y * this->speed > currTile.getCoords().y - 2)
+        && this->coords.x + Directions[int(dir)].x * speed < currTile.getCoords().x + 2
+        && this->coords.x + Directions[int(dir)].x * speed > currTile.getCoords().x - 2
+        && this->coords.y + Directions[int(dir)].y * speed < currTile.getCoords().y + 2
+        && this->coords.y + Directions[int(dir)].y * speed > currTile.getCoords().y - 2)
     {
         this->coords = currTile.getCoords();
     }
     // otherwise, go ahead
     else
     {
-        this->coords += Directions[int(dir)] * this->speed;
+        this->coords += Directions[int(dir)] * speed;
         if(this->coords.x + DEFINES.TILE_SIZE / 2 < currTile.getCoords().x
             || this->coords.x + DEFINES.TILE_SIZE / 2 > currTile.getCoords().x + DEFINES.TILE_SIZE
             || this->coords.y + DEFINES.TILE_SIZE / 2 < currTile.getCoords().y
@@ -304,6 +315,7 @@ void Ghost::changeMode(GhostMode mode)
         this->currentSprite = this->normalSprite;
         break;
     case GhostMode::scatter:
+        if(this->isOut && this->mode != GhostMode::dead && this->mode != GhostMode::scatter)
         this->mode = mode;
         this->currentSprite = this->normalSprite;
         break;
@@ -495,7 +507,8 @@ Direction Ghost::chooseDirection()
             }
             catch(InvalidTilePositionException)
             {
-                if(currTile.isTunel())
+                if(Directions[dir] != -Directions[int(this->moveDirection)]
+                    && currTile.isTunel())
                 {
                     return Direction(dir);
                 }
@@ -504,6 +517,7 @@ Direction Ghost::chooseDirection()
         }
     }
 
+    // else
     Direction shortestDir = this->moveDirection;
     int shortestLen = INT32_MAX;
     Position backPos = (this->position + Position(this->map.getWidth(), this->map.getHeight()) - Directions[int(shortestDir)])
@@ -529,7 +543,10 @@ Direction Ghost::chooseDirection()
             Position pos = (this->position + Position(this->map.getWidth(), this->map.getHeight()) + dir)
                                 % sf::Vector2i(this->map.getWidth(), this->map.getHeight());
 
-            if((!this->map(pos).isWall() || this->map(pos).isGhosthouseDoor())
+            if((!this->map(pos).isWall()
+                || (this->map(pos).isGhosthouseDoor()
+                    && (this->map(this->position).isGhosthouse()
+                        || this->mode == GhostMode::dead)))
                 && this->iMap[pos.c][pos.r] < shortestLen
                 && (this->moveDirection == Direction::none
                     || (this->coords.x < currTile.getCoords().x + 2

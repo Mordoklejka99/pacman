@@ -121,8 +121,18 @@ struct Defines
     float TOP_MARGIN;
     float HUD_MARGIN;
     float TILE_SIZE;
-    const float PACMAN_SPEED = 2.;
-    const float GHOST_SPEED = 1.7;
+    float BASE_SPEED = 2.f;
+    struct
+    {
+        float NORMAL;
+        float ON_DRUGS;
+    } PACMAN_SPEED;
+    struct
+    {
+        float NORMAL;
+        float FRIGHTENED;
+        float IN_TUNEL;
+    } GHOST_SPEED;
 };
 
 struct Textures
@@ -187,6 +197,7 @@ int distance(Position lhv, Position rhv);
 bool loadConfigFile();
 bool loadTextures();
 bool loadMap(MapData& mapData);
+bool loadLevel(MapData& mapData, int level);
 
 extern Defines DEFINES;
 extern Config CONFIG;

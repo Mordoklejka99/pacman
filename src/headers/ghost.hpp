@@ -17,7 +17,6 @@ protected:
     Direction moveDirection;
     Direction plannedTurn;
     GhostMode mode;
-    float speed;
     bool hasMoved;
     bool changedTile;
     bool isOut;
