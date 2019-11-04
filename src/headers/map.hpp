@@ -59,6 +59,7 @@ private:
 public:
     // ctor
     Map(MapData& mapData);
+    void reconstruct(MapData& mapData);
 
     // dtor
     ~Map();
@@ -74,6 +75,7 @@ public:
     void operator--(int);
 
     // methods
+    void restart();
     bool offTheMap(Position position) const;
     std::vector<Ghost*> ghostsInTile(Position position);
     void move();

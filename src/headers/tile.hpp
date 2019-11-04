@@ -35,6 +35,7 @@ public:
     void setGhost(bool state);
 
     // methods
+    void restart();
     bool isWall();
     bool isGhosthouseDoor();
     bool isGhosthouse();

@@ -24,6 +24,19 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
     this->sprite->setPosition(this->coords.x, this->coords.y);
 
     this->faceDirection = this->moveDirection = Direction::none;
+    this->score = 0;
+    this->onDrugs = false;
+    this->moved = false;
+    this->dead = false;
+}
+
+void Pacman::reconstruct(MapData& mapData, Map& map)
+{
+    this->coords = mapData.pacman.coords;
+
+    this->sprite->setPosition(this->coords.x, this->coords.y);
+
+    this->faceDirection = this->moveDirection = Direction::none;
     this->onDrugs = false;
     this->moved = false;
     this->dead = false;
@@ -31,6 +44,7 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
 
 
 // dtor
+
 Pacman::~Pacman()
 {
     delete this->sprite;

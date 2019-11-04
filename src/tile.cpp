@@ -90,6 +90,11 @@ void Tile::setGhost(bool state)
 }
 
 // methods
+void Tile::restart()
+{
+    this->pacman = false;
+    this->ghost = false;
+}
 
 bool Tile::isWall()
 {

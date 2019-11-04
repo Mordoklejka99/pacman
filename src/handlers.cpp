@@ -49,7 +49,30 @@ void handleGameEvents(sf::RenderWindow& window, Pacman& pacman)
     }
 }
 
-void handle()
+int handleGameOverEvents(sf::RenderWindow& window)
 {
-    std::cerr << "b" << std::endl;
+    sf::Event event;
+    while(window.pollEvent(event))
+    {
+        switch(event.type)
+        {
+        case sf::Event::KeyPressed:
+            switch(event.key.code)
+            {
+            case sf::Keyboard::Escape:
+                window.close();
+                return 0;
+            case sf::Keyboard::R:
+                return 1;
+            case sf::Keyboard::Return:
+                return 2;
+            default:
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    return 0;
 }

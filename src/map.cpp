@@ -21,11 +21,27 @@ Map::Map(MapData& mapData)
 
     this->tiles = mapData.tiles;
     this->dotCount = this->nOfDots = mapData.dotCount;
-
-    this->pinkyOut = false;
-    this->inkyOut = false;
-    this->clydeOut = false;
 }
+
+void Map::reconstruct(MapData& mapData)
+{
+    for(int c = 0; c < this->width; c++)
+    {
+        for(int r = 0; r < this->height; r++)
+        {
+            delete this->tiles[c][r];
+        }
+        delete[] this->tiles[c];
+    }
+    delete[] this->tiles;
+
+    this->width = mapData.width;
+    this->height = mapData.height;
+
+    this->tiles = mapData.tiles;
+    this->dotCount = this->nOfDots = mapData.dotCount;
+}
+
 
 // dtor
 Map::~Map()
@@ -78,6 +94,17 @@ void Map::operator--(int)
 }
 
 // methods
+void Map::restart()
+{
+    for(int c = 0; c < this->width; c++)
+    {
+        for(int r = 0; r < this->height; r++)
+        {
+            this->tiles[c][r]->restart();
+        }
+    }
+}
+
 bool Map::offTheMap(Position position) const
 {
     return position.c < 0 || position.c >= this->width || position.r < 0 || position.r >= this->height;

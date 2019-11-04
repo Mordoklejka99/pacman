@@ -46,6 +46,21 @@ Ghost::Ghost(MapData& mapData, Map& map, Textures textures) : map(map)
     this->wasDead = false;
 }
 
+void Ghost::reconstruct(MapData& mapData, Map& map)
+{
+    this->bMap = mapData.map;
+
+    this->currentSprite = this->normalSprite;
+
+    this->moveDirection = Direction::none;
+    this->mode = GhostMode::idle;
+    this->hasMoved = false;
+    this->changedTile = false;
+    this->isOut = false;
+    this->dead = false;
+    this->wasDead = false;
+}
+
 
 // dtor
 Ghost::~Ghost()
@@ -585,6 +600,16 @@ Blinky::Blinky(MapData& mapData, Map& map)
     this->isOut = true;
 }
 
+void Blinky::reconstruct(MapData& mapData, Map& map)
+{
+    this->coords = mapData.blinky.coords;
+    this->respawnPosition = mapData.blinky.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+
+    Ghost::reconstruct(mapData, map);
+}
+
+
 // methods
 Position Blinky::getDestination() const
 {
@@ -611,8 +636,17 @@ Pinky::Pinky(MapData& mapData, Map& map)
     this->coords = mapData.pinky.coords;
     this->respawnPosition = mapData.pinky.respawn;
     this->normalSprite->setPosition(this->coords.x, this->coords.y);
-    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
 }
+
+void Pinky::reconstruct(MapData& mapData, Map& map)
+{
+    this->coords = mapData.pinky.coords;
+    this->respawnPosition = mapData.pinky.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+
+    Ghost::reconstruct(mapData, map);
+}
+
 
 // methods
 Position Pinky::getDestination() const
@@ -632,7 +666,6 @@ bool Pinky::mayLeave() const
     if(this->timer.getElapsedTime().asMilliseconds() >= 1000)
     {
         this->timer.restart();
-        std::cerr << "Pinky" << std::endl;
         return true;
     }
     return false;
@@ -647,8 +680,17 @@ Inky::Inky(MapData& mapData, Map& map)
     this->coords = mapData.inky.coords;
     this->respawnPosition = mapData.inky.respawn;
     this->normalSprite->setPosition(this->coords.x, this->coords.y);
-    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
 }
+
+void Inky::reconstruct(MapData& mapData, Map& map)
+{
+    this->coords = mapData.inky.coords;
+    this->respawnPosition = mapData.inky.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+
+    Ghost::reconstruct(mapData, map);
+}
+
 
 // methods
 Position Inky::getDestination() const
@@ -674,7 +716,6 @@ bool Inky::mayLeave() const
     {
         this->map.timer.restart();
         this->map.dotCounter.restart();
-        std::cerr << "Inky" << std::endl;
         return true;
     }
     return false;
@@ -689,8 +730,17 @@ Clyde::Clyde(MapData& mapData, Map& map)
     this->coords = mapData.clyde.coords;
     this->respawnPosition = mapData.clyde.respawn;
     this->normalSprite->setPosition(this->coords.x, this->coords.y);
-    this->frightenedSprite->setPosition(this->coords.x, this->coords.y);
 }
+
+void Clyde::reconstruct(MapData& mapData, Map& map)
+{
+    this->coords = mapData.clyde.coords;
+    this->respawnPosition = mapData.clyde.respawn;
+    this->normalSprite->setPosition(this->coords.x, this->coords.y);
+
+    Ghost::reconstruct(mapData, map);
+}
+
 
 // methods
 Position Clyde::getDestination() const
@@ -714,7 +764,6 @@ bool Clyde::mayLeave() const
     {
         this->map.timer.restart();
         this->map.dotCounter.restart();
-        std::cerr << "Clyde" << std::endl;
         return true;
     }
     return false;

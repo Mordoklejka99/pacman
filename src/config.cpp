@@ -184,7 +184,7 @@ bool loadConfigFile()
         CONFIG.resolution.height = config["resolution"]["height"].asInt();
         CONFIG.fullscreen = config["fullscreen"].asBool();
     }
-    catch(std::exception e)
+    catch(Json::Exception)
     {
         std::cerr << "An error occurred during config loading in function loadConfigFile(). Config file corrupted or not existing." << std::endl;
         return false;
@@ -255,7 +255,7 @@ bool loadMap(MapData& mapData)
     {
         mapName = config["map"].asString();
     }
-    catch(std::exception e)
+    catch(Json::Exception)
     {
         std::cerr << "An error occurred during config loading in function loadMap(). Config file corrupted or not existing." << std::endl;
         return false;
@@ -309,7 +309,7 @@ bool loadMap(MapData& mapData)
         mapData.clyde.respawn.c = map["clyde"]["respawn"]["x"].asInt();
         mapData.clyde.respawn.r = map["clyde"]["respawn"]["y"].asInt();
     }
-    catch(std::exception e)
+    catch(Json::Exception)
     {
         std::cerr << "An error occurred during map loading in function loadMap(). Map file corrupted or not existing." << std::endl;
         return false;
@@ -370,7 +370,7 @@ bool loadMap(MapData& mapData)
             }
         }
     }
-    catch(std::exception e)
+    catch(Json::Exception)
     {
         std::cerr << "An error occurred during map loading in function loadMap(). Map file corrupted or not existing." << std::endl;
         return false;
@@ -396,7 +396,7 @@ bool loadLevel(MapData& mapData, int level)
     {
         mapName = config["map"].asString();
     }
-    catch(std::exception e)
+    catch(Json::Exception)
     {
         std::cerr << "An error occurred during config loading in function loadMap(). Config file corrupted or not existing." << std::endl;
         return false;
@@ -410,14 +410,25 @@ bool loadLevel(MapData& mapData, int level)
 
     try
     {
-        DEFINES.PACMAN_SPEED.NORMAL = DEFINES.BASE_SPEED * map["levels"][level - 1]["pacmanSpeed"]["normal"].asFloat();
-        DEFINES.PACMAN_SPEED.ON_DRUGS = DEFINES.BASE_SPEED * map["levels"][level - 1]["pacmanSpeed"]["onDrugs"].asFloat();
+        int levelIdx = 0;
+        while(true)
+        {
+            if(map["levels"][levelIdx]["lastLevel"].asInt() >= level)
+            {
+                break;
+            }
+            levelIdx++;
+        }
+        std::cerr << level << " " << levelIdx << std::endl;
+
+        DEFINES.PACMAN_SPEED.NORMAL = DEFINES.BASE_SPEED * map["levels"][levelIdx]["pacmanSpeed"]["normal"].asFloat();
+        DEFINES.PACMAN_SPEED.ON_DRUGS = DEFINES.BASE_SPEED * map["levels"][levelIdx]["pacmanSpeed"]["onDrugs"].asFloat();
         
-        DEFINES.GHOST_SPEED.NORMAL = DEFINES.BASE_SPEED * map["levels"][level - 1]["ghostSpeed"]["normal"].asFloat();
-        DEFINES.GHOST_SPEED.FRIGHTENED = DEFINES.BASE_SPEED * map["levels"][level - 1]["ghostSpeed"]["frightened"].asFloat();
-        DEFINES.GHOST_SPEED.IN_TUNEL = DEFINES.BASE_SPEED * map["levels"][level - 1]["ghostSpeed"]["inTunel"].asFloat();
+        DEFINES.GHOST_SPEED.NORMAL = DEFINES.BASE_SPEED * map["levels"][levelIdx]["ghostSpeed"]["normal"].asFloat();
+        DEFINES.GHOST_SPEED.FRIGHTENED = DEFINES.BASE_SPEED * map["levels"][levelIdx]["ghostSpeed"]["frightened"].asFloat();
+        DEFINES.GHOST_SPEED.IN_TUNEL = DEFINES.BASE_SPEED * map["levels"][levelIdx]["ghostSpeed"]["inTunel"].asFloat();
     }
-    catch(...)
+    catch(Json::Exception)
     {
         std::cerr << "An error occurred during level loading in function loadLevel(). Map file corrupted or not existing." << std::endl;
     }

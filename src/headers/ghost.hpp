@@ -34,6 +34,7 @@ protected:
 public:
     // ctor
     Ghost(MapData& mapData, Map& map, Textures textures);
+    void reconstruct(MapData& mapData, Map& map);
 
     // dtor
     ~Ghost();
@@ -67,6 +68,7 @@ class Blinky : public Ghost
 public:
     // ctor
     Blinky(MapData& mapData, Map& map);
+    void reconstruct(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;
@@ -79,6 +81,7 @@ class Pinky : public Ghost
 public:
     // ctor
     Pinky(MapData& mapData, Map& map);
+    void reconstruct(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;
@@ -91,6 +94,7 @@ class Inky : public Ghost
 public:
     // ctor
     Inky(MapData& mapData, Map& map);
+    void reconstruct(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;
@@ -103,6 +107,7 @@ class Clyde : public Ghost
 public:
     // ctor
     Clyde(MapData& mapData, Map& map);
+    void reconstruct(MapData& mapData, Map& map);
 
 private:
     virtual Position getDestination() const override;

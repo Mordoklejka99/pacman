@@ -10,6 +10,6 @@ class Pacman;
 
 void handleMenuEvents(sf::RenderWindow& window);
 void handleGameEvents(sf::RenderWindow& window, Pacman& pacman);
-void handle();
+int handleGameOverEvents(sf::RenderWindow& window);
 
 #endif

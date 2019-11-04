@@ -25,6 +25,7 @@ private:
 public:
     // ctor
     Pacman(MapData& mapData, Map& map);
+    void reconstruct(MapData& mapData, Map& map);
 
     // dtor
     ~Pacman();
