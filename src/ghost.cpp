@@ -24,9 +24,9 @@ sf::Clock Ghost::timer = sf::Clock();
 Ghost::Ghost(MapData& mapData, Map& map, Textures textures) : map(map)
 {
     this->bMap = mapData.map;
-    this->iMap = new int*[this->map.getHeight()];
-    for(int c = 0; c < this->map.getHeight(); c++)
-        this->iMap[c] = new int[this->map.getWidth()];
+    this->iMap = new int*[this->map.getWidth()];
+    for(int c = 0; c < this->map.getWidth(); c++)
+        this->iMap[c] = new int[this->map.getHeight()];
 
     this->normalSprite = new sf::Sprite(*textures.normalTexture);
     this->normalSprite->setScale(float(DEFINES.TILE_SIZE) / textures.normalTexture->getSize().x, float(DEFINES.TILE_SIZE) / textures.normalTexture->getSize().y);
@@ -53,13 +53,12 @@ Ghost::~Ghost()
     for(int c = 0; c < this->map.getWidth(); c++)
     {
         delete[] this->iMap[c];
-        delete[] this->bMap[c];
     }
     delete[] this->iMap;
-    delete[] this->bMap;
 
     delete this->normalSprite;
     delete this->frightenedSprite;
+    delete this->deadSprite;
 }
 
 

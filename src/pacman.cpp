@@ -24,6 +24,7 @@ Pacman::Pacman(MapData& mapData, Map& map) : map(map)
     this->sprite->setPosition(this->coords.x, this->coords.y);
 
     this->faceDirection = this->moveDirection = Direction::none;
+    this->onDrugs = false;
     this->moved = false;
     this->dead = false;
 }

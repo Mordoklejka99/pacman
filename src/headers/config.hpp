@@ -157,6 +157,15 @@ struct Config
     Textures inkyTextures;
     Textures pinkyTextures;
     Textures clydeTextures;
+
+    ~Config()
+    {
+        delete this->dotTexture;
+        delete this->superDotTexture;
+        delete this->wallTexture;
+        delete this->ghosthouseDoorTexture;
+        delete this->pacmanTexture;
+    }
 };
 
 struct MapData
